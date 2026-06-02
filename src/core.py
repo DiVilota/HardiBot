@@ -16,6 +16,7 @@ from src.rag_engine import HardiBotRAG
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
+from duckduckgo_search import DDGS
 
 load_dotenv(override=True)
 console = Console()
@@ -57,7 +58,24 @@ def calcular_presupuesto(operacion: str) -> str:
         return f"Error en cálculo: {e}"
 
 
-herramientas = [buscar_catalogo, calcular_presupuesto]
+@tool
+def buscar_foto_componente(query: str) -> str:
+    """
+    Usa esta herramienta SOLAMENTE para buscar la URL de una imagen de un producto de hardware.
+    Ingresa el nombre del componente (ejemplo: 'Ryzen 5 5600G box').
+    Devuelve la URL de la imagen.
+    """
+    try:
+        # Usamos la clase moderna DDGS
+        resultados = DDGS().images(query, max_results=1)
+        if resultados:
+            return resultados[0]["image"]
+        return "No se encontró imagen."
+    except Exception as e:
+        return f"Error al buscar imagen: {e}"
+
+
+herramientas = [buscar_catalogo, calcular_presupuesto, buscar_foto_componente]
 # ── 4. Construcción del Agente (LangGraph) ─────────
 memoria = MemorySaver()
 
