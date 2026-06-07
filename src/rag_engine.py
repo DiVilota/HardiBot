@@ -38,11 +38,12 @@ class HardiBotRAG:
         documents = []
 
         for _, row in df.iterrows():
+            precio_formateado = f"{int(row['Precio_CLP']):,}".replace(",", ".")
             chunk_content = (
                 f"Componente: {row['Categoria']}\n"
                 f"Producto: {row['Marca']} {row['Modelo']}\n"
                 f"Especificaciones Técnicas: {row['Especificaciones']}\n"
-                f"Precio: ${row['Precio_CLP']} CLP\n"
+                f"Precio: {precio_formateado} CLP\n"
                 f"Disponibilidad de Stock: {row['Stock']}"
             )
 
@@ -65,11 +66,42 @@ class HardiBotRAG:
             self.data_path = data_path
         return self.construir_indice()
 
-    def recuperar_contexto(self, query: str, top_k: int = 5) -> str:
+    def recuperar_contexto(self, query: str, top_k: int = 15) -> str:
         if not self.vector_store:
             console.print("[yellow]⚠️ Índice vacío. Construyendo índice primero...[/yellow]")
             self.construir_indice()
 
+        query_lower = query.lower()
+        palabras_clave = [p.strip() for p in query_lower.replace(",", "").split() if len(p.strip()) > 2]
+
+        coincidencias = []
+        try:
+            df = pd.read_csv(self.data_path)
+            for _, row in df.iterrows():
+                texto = f"{row['Marca']} {row['Modelo']} {row['Especificaciones']}".lower()
+                coinciden = sum(1 for p in palabras_clave if p in texto)
+                if coinciden > 0:
+                    coincidencias.append((coinciden, row))
+            coincidencias.sort(key=lambda x: -x[0])
+        except Exception:
+            pass
+
+        if coincidencias:
+            fragmentos = []
+            for _, row in coincidencias[:top_k]:
+                precio_formateado = f"{int(row['Precio_CLP']):,}".replace(",", ".")
+                frag = (
+                    f"Componente: {row['Categoria']}\n"
+                    f"Producto: {row['Marca']} {row['Modelo']}\n"
+                    f"Especificaciones Técnicas: {row['Especificaciones']}\n"
+                    f"Precio: {precio_formateado} CLP\n"
+                    f"Disponibilidad de Stock: {row['Stock']}"
+                )
+                fragmentos.append(frag)
+            console.print(f"[dim]🔍 Busqueda por keyword: {len(coincidencias)} coincidencias[/dim]")
+            return "\n---\n".join(fragmentos)
+
+        console.print("[dim]🔍 Sin coincidencias directas, usando FAISS...[/dim]")
         resultados = self.vector_store.similarity_search(query, k=top_k)
 
         contexto = "\n---\n".join([doc.page_content for doc in resultados])

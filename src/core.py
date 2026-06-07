@@ -71,7 +71,7 @@ def buscar_catalogo(query: str) -> str:
     precios, stock o compatibilidad de hardware.
     """
     envoltorio = HerramientaRobusta("RAG_Catalogo", motor_rag.recuperar_contexto)
-    return envoltorio.ejecutar(query=query, top_k=5)
+    return envoltorio.ejecutar(query=query, top_k=15)
 
 
 _OPERADORES = {
@@ -114,6 +114,51 @@ def calcular_presupuesto(operacion: str) -> str:
 
 
 @tool
+def buscar_web(query: str) -> str:
+    """
+    Busca en internet precios de la competencia, ofertas actuales, especificaciones
+    de productos o cualquier informacion actualizada del mercado chileno.
+    DEBES usar esta herramienta CUANDO:
+    - El usuario te pida comparar precios con la competencia.
+    - El usuario pregunte por precios de mercado actuales.
+    - Necesites validar si tu cotizacion es competitiva.
+    - El producto no este en tu catalogo y quieras investigar.
+    NO asumas que no tienes acceso a internet. Esta herramienta es tu ventana a la web.
+    """
+    api_key = os.getenv("TAVILY_API_KEY")
+    if api_key:
+        try:
+            from tavily import TavilyClient
+            client = TavilyClient(api_key=api_key)
+            resultados = client.search(query=query, search_depth="advanced", max_results=5)
+            if resultados and "results" in resultados:
+                fragments = []
+                for r in resultados["results"][:5]:
+                    title = r.get("title", "")
+                    url = r.get("url", "")
+                    content = r.get("content", "")
+                    fragments.append(f"**{title}**\n{content}\nFuente: {url}")
+                return "\n\n".join(fragments)
+            return "No se encontraron resultados en la busqueda web."
+        except Exception as e:
+            console.print(f"[dim yellow]⚠️ Tavily fallo: {e}. Usando fallback DuckDuckGo...[/dim yellow]")
+
+    try:
+        from duckduckgo_search import DDGS
+        resultados = DDGS().text(query, max_results=5)
+        fragments = []
+        for r in resultados:
+            fragments.append(f"**{r.get('title', '')}**\n{r.get('body', '')}\nFuente: {r.get('href', '')}")
+        return "\n\n".join(fragments) if fragments else "No se encontraron resultados en la busqueda web."
+    except Exception as e:
+        return json.dumps({
+            "error": "No se pudo realizar la busqueda web.",
+            "detalle": str(e),
+            "sugerencia": "Informa al usuario que no hay conectividad a internet en este momento.",
+        })
+
+
+@tool
 def buscar_foto_componente(query: str) -> str:
     """Busca la URL de una imagen de un producto de hardware (DDGS)."""
     try:
@@ -138,7 +183,7 @@ def ver_carrito() -> str:
     return carrito_hardibot.ver()
 
 
-herramientas = [buscar_catalogo, calcular_presupuesto, buscar_foto_componente, agregar_al_carrito, ver_carrito]
+herramientas = [buscar_catalogo, buscar_web, calcular_presupuesto, buscar_foto_componente, agregar_al_carrito, ver_carrito]
 
 memoria = MemorySaver()
 

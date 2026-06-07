@@ -206,6 +206,7 @@ class SoloTodoScraper(CatalogScraper):
             "page": page,
             "page_size": 100,
             "format": "json",
+            "ordering": "-last_updated",
         }
         return self._fetch_json(url, params)
 

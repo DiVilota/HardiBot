@@ -48,3 +48,4 @@ pytest>=7.0.0
 
 # --- Herramienta de búsqueda ---
 duckduckgo_search>=6.0.0
+tavily-python>=0.3.0
