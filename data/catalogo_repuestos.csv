@@ -1,0 +1,55 @@
+Categoria,Marca,Modelo,Especificaciones,Precio_CLP,Stock
+Frenos,Bosch,Pastillas Freno Delanteras,Pastillas ceramicas para auto sedan 2020+,45990,Alta
+Frenos,Bosch,Discos Freno Delanteros,Disco ventilado 280mm para sedan compacto,69990,Media
+Frenos,Bosch,Bomba Freno Maestra,"Bomba principal frenos 1"" para vehiculos livianos",55990,Media
+Frenos,Bosch,Liquido Freno DOT4 1L,Liquido frenos DOT4 alto rendimiento 1L,15990,Alta
+Frenos,TRW,Pastillas Freno Traseras,Pastillas semimetálicas para SUV,49990,Alta
+Frenos,TRW,Tambor Freno Trasero,Tambor freno trasero 200mm para sedan,44990,Baja
+Frenos,NK,Flexible Freno Delantero,Manguera freno acero trenzado 50cm,19990,Alta
+Suspension,KYB,Amortiguador Delantero,Amortiguador gas presion para sedan 4p,89990,Media
+Suspension,KYB,Amortiguador Trasero,Amortiguador gas presion para sedan 4p,79990,Media
+Suspension,Sachs,Kit Embrague,Kit embrague completo para motor 1.4-2.0,299990,Media
+Suspension,Sachs,Espiral Suspension,Resorte helicoidal tipo A para sedan,59990,Baja
+Suspension,Monroe,Buje Suspension Inferior,Buje poliuretano dureza 90A,25990,Media
+Suspension,Monroe,Barra Estabilizadora,Barra estabilizadora 20mm para sedan,39990,Media
+Motor,Bosch,Bujias Encendido Iridium,Juego 4 bujias iridium 1.6-2.0,25990,Alta
+Motor,NGK,Bujias Standard,Juego 4 bujias cobre para motor basico,12990,Alta
+Motor,Bosch,Alternador 120A,Alternador 120 amperios 12V para sedan,199990,Media
+Motor,Bosch,Motor Partida 1.4kW,Motor partida 12V 1.4kW para sedan/hatchback,159990,Media
+Motor,Bosch,Correa Distribucion Kit,Kit distribucion completo incluye tensor,89990,Alta
+Motor,Gates,Correa Alternador,Correa serpentina 5PK 1730 para motor 2.0,15990,Alta
+Motor,Valeo,Radiador Motor,Radiador aluminio para motor 1.6-2.0 automatico,129990,Baja
+Motor,Valeo,Sensor Temperatura,Sensor temperatura refrigerante standard,19990,Alta
+Filtros,Mann,Filtro Aceite,"Filtro aceite rosca 3/4"" para motor bencinero",9990,Alta
+Filtros,Mann,Filtro Aire,Filtro aire panel cuadrado 30x20cm,14990,Alta
+Filtros,Mann,Filtro Habitaculo,Filtro cabina carbon activado 25x20cm,12990,Alta
+Filtros,Mann,Filtro Combustible,"Filtro bencina rosca 1/2"" standard",8990,Alta
+Filtros,Bosch,Filtro Aceite Premium,Filtro aceite alto rendimiento sintetico,14990,Media
+Electrico,Bosch,Bateria Auto 60Ah,Bateria 12V 60Ah 540CCA para sedan,89990,Alta
+Electrico,Bosch,Bateria Auto 75Ah,Bateria 12V 75Ah 680CCA para SUV,119990,Alta
+Electrico,Bosch,Sensor Oxigeno Lambda,Sensor O2 universal 4 cables,45990,Media
+Electrico,Bosch,Bobina Encendido,Bobina encendido doble para motor 4 cilindros,35990,Alta
+Electrico,Bosch,Cable Bujias Juego,Juego cables bujias silicio 4 cilindros,25990,Alta
+Electrico,Hella,Faro Delantero Completo,Faro halogeno derecho sedan 2018+,129990,Media
+Electrico,Hella,Faro LED Neblinero,Kit faros niebla LED universal 2 piezas,59990,Alta
+Electrico,Hella,Luz Freno LED,Lampara LED stop trasera universal 12V,19990,Alta
+Electrico,Hella,Bocina Electrica,Kit bocina doble tono 12V 110dB,19990,Alta
+Transmision,Mobil,Aceite Motor 5W30 4L,Aceite sintetico API SP 5W30,35990,Alta
+Transmision,Mobil,Aceite Motor 10W40 4L,Aceite semisintetico API SL 10W40,25990,Alta
+Transmision,Mobil,Aceite Transmision ATF,Aceite transmision automatica ATF 1L,14990,Alta
+Transmision,Mobil,Refrigerante 50% 4L,Refrigerante concentrado verde 50%,15990,Alta
+Transmision,Castrol,Aceite Motor 5W40 5L,Aceite sintetico premium para turbo,49990,Media
+Refrigeracion,Valeo,Compresor AC 12V,Compresor aire acondicionado 12V 150cc,349990,Baja
+Refrigeracion,Valeo,Condensador AC,Condensador AC para sedan compacto,159990,Media
+Refrigeracion,Valeo,Evaporador AC,Evaporador AC standard 12V,129990,Baja
+Refrigeracion,Valeo,Filtro Secador AC,Filtro secador aire acondicionado,29990,Media
+Direccion,TRW,Terminal Direccion,Terminal direccion izquierda para sedan,25990,Alta
+Direccion,TRW,Rotula Suspension,Rotula suspension inferior para sedan,22990,Alta
+Direccion,TRW,Barra Direccion Cremallera,Cremallera direccion para sedan 2015+,249990,Baja
+Escape,Bosch,Sonda Lambda Universal,Sonda O2 universal 4 cables 12V,45990,Media
+Escape,Bosch,Catalizador Universal,"Convertidor catalitico universal 2.5""",199990,Media
+Escape,Walker,Silenciador Trasero,"Silenciador trasero universal 2"" acero",59990,Media
+Carroceria,Bosch,Limpiaparabrisas Juego,"Juego limpiaparabrisas 22""+20"" standard",19990,Alta
+Carroceria,Bosch,Plumillas Limpiaparabrisas,"Plumilla limpiaparabrisas 22"" hoja plana",14990,Alta
+Carroceria,Hella,Retrovisor Lateral,Retrovisor electrico con calefaccion derecho,79990,Media
+Carroceria,Hella,Manilla Puerta Exterior,Manilla puerta exterior cromada 4p,29990,Alta

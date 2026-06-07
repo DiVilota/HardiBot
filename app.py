@@ -1,36 +1,62 @@
 import streamlit as st
-from src.core import chat_hardibot_stream_sync
+from src.core import chat_hardibot_stream_sync, reconfigurar_agente
+from src.personas import PERSONAS
 
-# Configuración de la página
-st.set_page_config(page_title="HardiBot", page_icon="🤖", layout="centered")
-st.title("🤖 HardiBot")
-st.caption("Tu Consultor Experto en Hardware Computacional (Duoc UC Edition)")
+st.set_page_config(page_title="HardiBot", layout="centered")
 
-# Inicializar el historial de chat en la memoria de Streamlit
+persona_actual = PERSONAS[st.session_state.get("persona_id", "hardware")]
+st.title(persona_actual["nombre"])
+st.caption(persona_actual["descripcion"])
+
+PERSONA_IDS = list(PERSONAS.keys())
+
+if "persona_id" not in st.session_state:
+    st.session_state.persona_id = "hardware"
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": "¡Hola! Soy HardiBot. ¿Qué tipo de PC necesitas armar hoy?",
-        }
+        {"role": "assistant", "content": f"¡Hola! Soy {persona_actual['nombre']}. {persona_actual['descripcion']}"}
     ]
 
-# Renderizar los mensajes del historial
+with st.sidebar:
+    st.markdown("**Demo - Marca Blanca**")
+    cols = st.columns(len(PERSONA_IDS))
+    for i, pid in enumerate(PERSONA_IDS):
+        p = PERSONAS[pid]
+        with cols[i]:
+            if st.button(p["nombre"], key=f"btn_{pid}", help=f"Cambiar a {p['descripcion']}"):
+                if st.session_state.persona_id != pid:
+                    info = reconfigurar_agente(pid)
+                    st.session_state.persona_id = pid
+                    st.session_state.messages = [
+                        {"role": "assistant", "content": f"¡Hola! Soy {info['nombre']}. {PERSONAS[pid]['descripcion']}"}
+                    ]
+                    st.rerun()
+
+    st.divider()
+    st.caption(f"Persona activa: **{persona_actual['nombre']}**")
+    st.caption(f"Catalogo: `{persona_actual['catalogo']}`")
+
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Capturar el input del usuario
-if prompt := st.chat_input("Escribe tu consulta aquí..."):
-    # Mostrar el mensaje del usuario en pantalla
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # Mostrar la respuesta del bot en streaming
-    with st.chat_message("assistant"):
-        # st.write_stream consume el generador que hicimos en core.py
-        response = st.write_stream(chat_hardibot_stream_sync(prompt))
-
-    # Guardar la respuesta final en el historial
-    st.session_state.messages.append({"role": "assistant", "content": response})
+if prompt := st.chat_input("Escribe tu consulta aqui..."):
+    if prompt.startswith("/persona "):
+        pid = prompt.split(" ", 1)[1].strip().lower()
+        if pid in PERSONA_IDS:
+            info = reconfigurar_agente(pid)
+            st.session_state.persona_id = pid
+            st.session_state.messages = [
+                {"role": "assistant", "content": f"Cambiado a **{info['nombre']}**. {info['titulo']}"}
+            ]
+            st.rerun()
+        else:
+            st.session_state.messages.append({"role": "assistant", "content": f"Persona no valida. Opciones: {', '.join(PERSONA_IDS)}"})
+            st.rerun()
+    else:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        with st.chat_message("assistant"):
+            response = st.write_stream(chat_hardibot_stream_sync(prompt))
+        st.session_state.messages.append({"role": "assistant", "content": response})
