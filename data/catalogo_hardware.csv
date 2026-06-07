@@ -1,16 +1,136 @@
 Categoria,Marca,Modelo,Especificaciones,Precio_CLP,Stock
-Procesador,AMD,Ryzen 5 5600G,AM4 6-Cores 12-Threads 3.9GHz con graficos integrados Radeon,145000,Alta
-Procesador,AMD,Ryzen 7 7800X3D,AM5 8-Cores 16-Threads 4.2GHz 120W TDP Especial para Gaming,390000,Media
-Procesador,Intel,Core i9-14900K,LGA1700 24-Cores 32-Threads 3.2GHz 253W TDP High End,620000,Baja
-Placa_Madre,Asus,Prime A320M-K,AM4 Micro-ATX DDR4 PCIe 3.0 Basica,55000,Alta
-Placa_Madre,MSI,PRO B650-P WIFI,AM5 ATX DDR5 PCIe 4.0,185000,Media
-Placa_Madre,Gigabyte,Z790 AORUS ELITE AX,LGA1700 ATX DDR5 PCIe 5.0 Alta disipacion VRM,280000,Media
-Tarjeta_Video,NVIDIA,RTX 4060 8GB,DLSS 3.0 Ideal para 1080p Ultra,320000,Alta
-Tarjeta_Video,NVIDIA,RTX 4070 Ti SUPER 16GB,Ideal para 1440p y 4K Entry,850000,Baja
-Tarjeta_Video,AMD,Radeon RX 7600 8GB,Competidor directo de RTX 4060 para 1080p,285000,Alta
-Memoria_RAM,Kingston,Fury Beast 16GB (2x8GB) DDR4,3200MHz CL16,48000,Alta
-Memoria_RAM,Corsair,Vengeance 32GB (2x16GB) DDR5,6000MHz CL30 Optimizado AMD EXPO,135000,Media
-Almacenamiento,Western Digital,WD Black SN850X 1TB,SSD NVMe M.2 PCIe 4.0 7300MB/s,105000,Media
-Almacenamiento,Kingston,NV2 1TB,SSD NVMe M.2 PCIe 4.0 3500MB/s Basico,65000,Alta
-Fuente_Poder,Corsair,RM750e,750W 80 Plus Gold Full Modular ATX 3.0,110000,Media
-Fuente_Poder,EVGA,500 W1,500W 80 Plus White No Modular,45000,Alta
+Procesador,AMD,AMD Athlon 220GE [YD220GC6M2OFB],2 Núcleos / 4 Hilos / 3400MHz / 3400MHz Turbo / Socket AM4 / 35W TDP,499862,Baja
+Procesador,AMD,AMD Athlon 200GE [YD200GC6FBBOX],2 Núcleos / 4 Hilos / 3200MHz / 3200MHz Turbo / Socket AM4 / 35W TDP,750000,Alta
+Procesador,AMD,AMD Phenom II X2 555 Black Edition,2 Núcleos / 2 Hilos / 3200MHz / 3200MHz Turbo / Socket AM3 / 80W TDP,298483,Baja
+Procesador,AMD,AMD A10-7870K [AD787KXDJCBOX],4 Núcleos / 4 Hilos / 3900MHz / 4100MHz Turbo / Socket FM2+ / 95W TDP,250933,Alta
+Procesador,AMD,AMD Athlon X4 860K,4 Núcleos / 4 Hilos / 3700MHz / 4000MHz Turbo / Socket FM2+ / 95W TDP,385116,Media
+Procesador,AMD,AMD Athlon II X2 255,2 Núcleos / 2 Hilos / 3100MHz / 3100MHz Turbo / Socket AM3 / 65W TDP,529564,Alta
+Procesador,AMD,AMD A10-5800K,4 Núcleos / 4 Hilos / 3800MHz / 4200MHz Turbo / Socket FM2 / 100W TDP,72973,Alta
+Procesador,AMD,AMD FX-4170,4 Núcleos / 4 Hilos / 4200MHz / 4200MHz Turbo / Socket AM3+ / 125W TDP,206713,Alta
+Procesador,AMD,AMD A4-3400,2 Núcleos / 2 Hilos / 2700MHz / 2700MHz Turbo / Socket FM1 / 65W TDP,607853,Alta
+Procesador,AMD,AMD FX-8150,8 Núcleos / 8 Hilos / 3600MHz / 4200MHz Turbo / Socket AM3+ / 125W TDP,394245,Alta
+Procesador,AMD,AMD FX-6100,6 Núcleos / 6 Hilos / 3300MHz / 3900MHz Turbo / Socket AM3+ / 95W TDP,588685,Media
+Procesador,AMD,AMD A10-7890K,4 Núcleos / 4 Hilos / 4100MHz / 4300MHz Turbo / Socket FM2+ / 95W TDP,554953,Alta
+Procesador,AMD,AMD Athlon II X3 440,3 Núcleos / 3 Hilos / 3000MHz / 3000MHz Turbo / Socket AM3 / 95W TDP,556721,Baja
+Procesador,AMD,AMD Athlon II X3 445,3 Núcleos / 3 Hilos / 3100MHz / 3100MHz Turbo / Socket AM3 / 95W TDP,464659,Media
+Procesador,AMD,AMD FX-4350,4 Núcleos / 4 Hilos / 4200MHz / 4400MHz Turbo / Socket AM3+ / 125W TDP,741734,Alta
+Placa_Madre,ASRock,ASRock A785GM-LE,Formato Micro ATX,170135,Baja
+Placa_Madre,ASRock,ASRock B450 Pro4,Formato ATX,210092,Alta
+Placa_Madre,ASRock,ASRock B450 Steel Legend,Formato ATX,229546,Alta
+Placa_Madre,ASRock,ASRock 970 Extreme4,Formato ATX,76906,Media
+Placa_Madre,ASRock,ASRock 890GX PRO3,Formato ATX,222849,Baja
+Placa_Madre,ASRock,ASRock B360M-HDV,Formato Micro ATX,260567,Alta
+Placa_Madre,ASRock,ASRock 970DE3/U3S3,Formato ATX,242370,Baja
+Placa_Madre,ASRock,ASRock B450M Pro4 R2.0,Formato Micro ATX,197918,Alta
+Placa_Madre,ASRock,ASRock A320M Pro4,Formato Micro ATX,247028,Alta
+Placa_Madre,ASRock,ASRock B360M-ITX/ac,Formato Mini ITX,187186,Baja
+Placa_Madre,ASRock,ASRock 870 EXTREME3 R2.0,Formato ATX,254384,Alta
+Placa_Madre,ASRock,ASRock B250M Pro4,Formato Micro ATX,259577,Alta
+Placa_Madre,ASRock,ASRock B450 Pro4 R2.0,Formato ATX,123743,Baja
+Placa_Madre,ASRock,ASRock B550M Pro SE,Formato Micro ATX,300920,Baja
+Placa_Madre,ASRock,ASRock A75M,Formato Micro ATX,45000,Baja
+Tarjeta_Video,ASRock,ASRock Radeon RX 7600 Challenger 8GB OC [RX7600 CL 8GO],GPU AMD Radeon RX 7600 / 8 GB GDDR6,1546526,Media
+Tarjeta_Video,Acer,Acer Nitro Intel Arc B580 12GB,GPU Intel Arc B580 / 12 GB GDDR6,1523068,Alta
+Tarjeta_Video,ASRock,ASRock Radeon RX 6950 XT OC Formula 16GB [RX6950XT OCF 16G],GPU AMD Radeon RX 6950 XT / 16 GB GDDR6,610592,Alta
+Tarjeta_Video,ASRock,ASRock Challenger 8GB OC [A580 CL 8GO],GPU Intel Arc A580 / 8 GB GDDR6,775461,Media
+Tarjeta_Video,ASRock,ASRock Challenger Radeon RX 5600 6GB GDDR6 [RX5600 CLD 6G],GPU AMD Radeon RX 5600 / 6 GB GDDR6,1281063,Baja
+Tarjeta_Video,ASRock,ASRock Radeon RX 6500 XT Phantom Gaming D 4GB OC [RX6500XT PGD 4GO],GPU AMD Radeon RX 6500 XT / 4 GB GDDR6,2009043,Baja
+Tarjeta_Video,ASRock,ASRock PULSE AMD Radeon RX 6400 [11315-01-20G],GPU AMD Radeon RX 6400 / 4 GB GDDR6,1849273,Alta
+Tarjeta_Video,ASRock,ASRock Challenger D 8GB OC RX 6600 [RX6600 CLD 8G],GPU AMD Radeon RX 6600 / 8 GB GDDR6,1673607,Alta
+Tarjeta_Video,AMD,AMD Radeon PRO WX 3100 [100-505999],GPU AMD Radeon Pro WX 3100 / 4 GB GDDR5,1449262,Alta
+Tarjeta_Video,ASRock,ASRock Radeon RX 6700 XT Challenger D 12GB [RX6700XT CLD 12G],GPU AMD Radeon RX 6700 XT / 12 GB GDDR6,521430,Media
+Tarjeta_Video,ASRock,ASRock Radeon RX 7900 XT Phantom Gaming White 20GB OC [RX7900XT PGW 20GO],GPU AMD Radeon RX 7900 XT / 20 GB GDDR6,759266,Alta
+Tarjeta_Video,ASRock,ASRock Phantom Gaming X Radeon RX580 8G OC [90-GA0000-00UANF],GPU AMD Radeon RX 580 / 8 GB GDDR5,1144505,Alta
+Tarjeta_Video,AMD,AMD RX 6600 8 GB OEM,GPU AMD Radeon RX 6600 / 8 GB GDDR6,2271779,Media
+Tarjeta_Video,ASRock,ASRock Phantom Gaming D Radeon RX580 8G OC [PG D RADEON RX580 8G OC],GPU AMD Radeon RX 580 / 8 GB GDDR5,498613,Baja
+Tarjeta_Video,ASRock,ASRock Arc B580 Steel Legend 12GB OC [B580 SL 12GO],GPU Intel Arc B580 / 12 GB GDDR6,1054765,Alta
+Memoria_RAM,A-DATA,A-DATA (1 x 1GB | DIMM DDR-333),1 x 1 GB,94524,Media
+Memoria_RAM,A-DATA,A-DATA AD4U2133W4G15-R (1 x 4GB | DIMM DDR4-2133),1 x 4 GB,51795,Alta
+Memoria_RAM,A-DATA,A-DATA AD2S800B2G6-S (1 x 2GB | SO-DIMM DDR2-800),1 x 2 GB,160376,Media
+Memoria_RAM,A-DATA,A-DATA AD4S2400J4G17-S (1 x 4GB | SO-DIMM DDR4-2400),1 x 4 GB,34708,Alta
+Memoria_RAM,A-DATA,A-DATA AD3S1333C4G9-S (1 x 4GB | SO-DIMM DDR3-1333),1 x 4 GB,156253,Alta
+Memoria_RAM,A-DATA,A-DATA AD4S2400W8G17-S (1 x 8GB | SO-DIMM DDR4-2400),1 x 8 GB,121576,Alta
+Memoria_RAM,A-DATA,A-DATA AD3U1600W4G11-S (1 x 4GB | DIMM DDR3-1600),1 x 4 GB,45906,Alta
+Memoria_RAM,A-DATA,A-DATA AD3S1333W4G9-S (1 x 4GB | SO-DIMM DDR3-1333),1 x 4 GB,82572,Media
+Memoria_RAM,A-DATA,A-DATA (1 x 256MB | DIMM DDR-400),1 x 256 MB,58096,Baja
+Memoria_RAM,A-DATA,A-DATA AD4S2666732G19-SGN (1 x 32GB | SO-DIMM DDR4-2666),1 x 32 GB,101524,Alta
+Memoria_RAM,A-DATA,A-DATA AD4S2133W8G15-B (1 x 8GB | SO-DIMM DDR4-2133),1 x 8 GB,39934,Media
+Memoria_RAM,A-DATA,A-DATA AD4S3200716G22-SGN (1 x 16GB | SO-DIMM DDR4-3200),1 x 16 GB,92505,Baja
+Memoria_RAM,A-DATA,A-DATA AD4U213338G15-S (1 x 8GB | DIMM DDR4-2133),1 x 8 GB,93550,Alta
+Memoria_RAM,A-DATA,A-DATA AD4S266616G19-SBK (1 x 16GB | SO-DIMM DDR4-2666),1 x 16 GB,76433,Alta
+Memoria_RAM,A-DATA,A-DATA (1 x 2GB | DIMM DDR2-667),1 x 2 GB,185365,Alta
+Almacenamiento,A-DATA,A-DATA Ultimate SU800 2 TB (ASU800SS-2TT-C),"2 TB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",65598,Media
+Almacenamiento,A-DATA,A-DATA Ultimate SU650 120 GB (ASU650SS-120GT-C),"120 GB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",188659,Media
+Almacenamiento,A-DATA,A-DATA Legend 800 2 TB (ALEG-800-2000GCS),2 TB / Interfaz PCIe 4.0 x4 / M.2 (2280),203525,Baja
+Almacenamiento,A-DATA,A-DATA Legend 820 1 TB (SLEG-820-1T-CB),1 TB / Interfaz PCIe 4.0 x4 / M.2 (2230),21363,Media
+Almacenamiento,A-DATA,A-DATA Ultimate SU800 512 GB (ASU800NS38-512GT-C),512 GB / Interfaz SATA 3 (6.0 Gb/s) / M.2 (2280),198085,Media
+Almacenamiento,A-DATA,A-DATA Legend 710 512 GB (ALEG-710-512GCS),512 GB / Interfaz PCIe 3.0 x4 / M.2 (2280),89080,Alta
+Almacenamiento,A-DATA,A-DATA 120 GB (AS510S3-120GM-O),"120 GB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",26192,Alta
+Almacenamiento,Acer,Acer SA100 120 GB (BL.9BWWA.101),"120 GB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",183660,Alta
+Almacenamiento,A-DATA,A-DATA Legend 860 500 GB (SLEG-860-500GCS),500 GB / Interfaz PCIe 4.0 x4 / M.2 (2280),102277,Alta
+Almacenamiento,A-DATA,A-DATA Legend 970 Pro 1 TB (SLEG-970P-1TCI),1 TB / Interfaz PCIe 5.0 x4 / M.2 (2280),189708,Baja
+Almacenamiento,A-DATA,A-DATA 64 GB (ISSS314-064GB),"64 GB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",106999,Alta
+Almacenamiento,A-DATA,A-DATA Ultimate SU650 256 GB (ASU650NS38-256GT-C),256 GB / Interfaz SATA 3 (6.0 Gb/s) / M.2 (2280),250000,Baja
+Almacenamiento,A-DATA,A-DATA Legend 800 500 GB (ALEG-800-500GCS),500 GB / Interfaz PCIe 4.0 x4 / M.2 (2280),36507,Alta
+Almacenamiento,A-DATA,A-DATA Premier Pro SP600 64 GB (ASP600S3-64GM-C),"64 GB / Interfaz SATA 3 (6.0 Gb/s) / 2.5""",150619,Baja
+Almacenamiento,A-DATA,A-DATA Premier Pro SP310 128 GB (ASP310S3-128GM-C),128 GB / Interfaz SATA 3 (6.0 Gb/s) / mSATA,136072,Baja
+Fuente_Poder,Antec,Antec High Current Gamer HCG-750 (750 W),Antec High Current Gamer HCG-750 (750 W),162501,Alta
+Fuente_Poder,Antec,Antec High Current Gamer HCG650 Gold (650 W),Antec High Current Gamer HCG650 Gold (650 W),146721,Media
+Fuente_Poder,Antec,Antec NeoECO NE600G Zen (600 W),Antec NeoECO NE600G Zen (600 W),60275,Alta
+Fuente_Poder,Antec,Antec High Current Gamer HCG-520 (520 W),Antec High Current Gamer HCG-520 (520 W),148830,Alta
+Fuente_Poder,Antec,Antec Atom G750 Gold (750 W),Antec Atom G750 Gold (750 W),119602,Media
+Fuente_Poder,Acbel,Acbel M8 670 (620 W),Acbel M8 670 (620 W),117961,Alta
+Fuente_Poder,Antec,Antec Basic Power BP350 (350 W),Antec Basic Power BP350 (350 W),209071,Media
+Fuente_Poder,Antec,Antec High Current Gamer HCG750 Bronze (750 W),Antec High Current Gamer HCG750 Bronze (750 W),63092,Alta
+Fuente_Poder,Antec,Antec CSK 650 (X5000A255HC-20) (650 W),Antec CSK 650 (X5000A255HC-20) (650 W),182643,Media
+Fuente_Poder,Antec,Antec High Current Pro HCP-850 Platinum (850 W),Antec High Current Pro HCP-850 Platinum (850 W),137139,Alta
+Fuente_Poder,Antec,Antec High Current Gamer HCG-520M (520 W),Antec High Current Gamer HCG-520M (520 W),183050,Alta
+Fuente_Poder,Antec,Antec GSK 750 ATX3.1 (750 W),Antec GSK 750 ATX3.1 (750 W),191174,Media
+Fuente_Poder,Antec,Antec High Current Gamer Gold HCG850 Extreme (850 W),Antec High Current Gamer Gold HCG850 Extreme (850 W),187952,Alta
+Fuente_Poder,Antec,Antec Neo Eco NE1300G M ATX 3.1 (0-761345-11398-4) (1300 W),Antec Neo Eco NE1300G M ATX 3.1 (0-761345-11398-4) (1300 W),155466,Media
+Fuente_Poder,Antec,Antec High Current Gamer HCG-750M (750 W),Antec High Current Gamer HCG-750M (750 W),202974,Baja
+Gabinete,Aerocool,Aerocool Bolt Tempered Glass (BOLT-G-BK-V1),Aerocool Bolt Tempered Glass (BOLT-G-BK-V1),51770,Baja
+Gabinete,Aerocool,Aerocool Scar,Aerocool Scar,95037,Baja
+Gabinete,Aerocool,Aerocool Menace Saturn FRGB V1,Aerocool Menace Saturn FRGB V1,136245,Alta
+Gabinete,Aerocool,Aerocool Aero-500G RGB - Negro,Aerocool Aero-500G RGB - Negro,123931,Media
+Gabinete,Acteck,Acteck G200 (AC-929011),Acteck G200 (AC-929011),79754,Alta
+Gabinete,Aerocool,Aerocool P7-C0 PRO,Aerocool P7-C0 PRO,97289,Media
+Gabinete,Aerocool,Aerocool Aero One Mini Frost (Aero One Mini Frost-G-BK-V1),Aerocool Aero One Mini Frost (Aero One Mini Frost-G-BK-V1),80005,Media
+Gabinete,Aerocool,Aerocool Split Tempered Glass,Aerocool Split Tempered Glass,25000,Alta
+Gabinete,Aerocool,Aerocool Cylon Pro Tempered Glass - White,Aerocool Cylon Pro Tempered Glass - White,123418,Alta
+Gabinete,Aerocool,Aerocool AeroEngine RGB Tempered Glass,Aerocool AeroEngine RGB Tempered Glass,118541,Alta
+Gabinete,Acteck,Acteck Niall GI004 (AC-922739),Acteck Niall GI004 (AC-922739),112455,Baja
+Gabinete,Aerocool,Aerocool AeroEngine RGB,Aerocool AeroEngine RGB,131647,Baja
+Gabinete,Acteck,Acteck Ultron X600 (AC-929547),Acteck Ultron X600 (AC-929547),25000,Baja
+Gabinete,Acteck,Acteck Heinkel GP002 (AC-922784),Acteck Heinkel GP002 (AC-922784),63634,Media
+Gabinete,Acteck,Acteck Bern Slim TD-510 (GAPC-301),Acteck Bern Slim TD-510 (GAPC-301),110966,Media
+Monitor,Acer,Acer K242HL [UM.FX2AA.003],"24.0"" / Panel TN",491196,Baja
+Monitor,Acer,Acer KG241 bii [UM.FX1AA.006],"24.0"" / Panel TN",208262,Baja
+Monitor,Acer,Acer Nitro XZ270 Xbmiiphz,"27.0"" / Panel VA",312746,Alta
+Monitor,Acer,Acer Nitro QG1 QG241Y Pbmiipx [MM.TKQAA.002.1],"24.0"" / Panel VA",278957,Media
+Monitor,Acer,Acer KG271G [UM.UX1AA.P0],"27.0"" / Panel TN",455895,Alta
+Monitor,Acer,Acer Nitro ED270 Xbmiipx [UM.HE0AA.X01],"27.0"" / Panel VA",771469,Baja
+Monitor,Acer,Acer KG251Q bmiix [UM.KX1AA.002],"25.0"" / Panel TN",291218,Alta
+Monitor,Acer,Acer ED273 Abidpx [UM.HE3AA.A01],"27.0"" / Panel VA",177185,Alta
+Monitor,Acer,Acer KB272 EBI [MM.V5BAA.001 / PTM-0168],"27.0"" / Panel IPS",677725,Alta
+Monitor,Acer,Acer K222HQL bd,"22.0"" / Panel TN",80000,Alta
+Monitor,Acer,Acer AL1716F,"17.0"" / Panel TN",507285,Baja
+Monitor,Acer,Acer ED240Q Sbiip [UM.UE0AA.S01],"23.6"" / Panel VA",508844,Alta
+Monitor,Acer,Acer Nitro XZ270 X2BMIIPHX [MM.V3HAA.001],"27.0"" / Panel VA",187683,Baja
+Monitor,Acer,Acer ED320QR [UM.JE0AA.006],"31.5"" / Panel VA",767476,Alta
+Monitor,Acer,Acer Nitro QG1 QG241Y Pbmiipx [UM.QQ1AA.P01],"24.0"" / Panel VA",772645,Alta
+Cooler_CPU,Antec,Antec A30,Tipo Ventilador,24997,Media
+Cooler_CPU,Antec,Antec A30 PRO,Tipo Ventilador,46850,Alta
+Cooler_CPU,Alseye,Alseye M120D Plus Black,Tipo Ventilador,38252,Baja
+Cooler_CPU,AirMax,AirMax AX83,Tipo Ventilador,43660,Alta
+Cooler_CPU,Aigo,Aigo DarkFlash Twister DX-240 (Black),Tipo Refrigeración líquida,75565,Alta
+Cooler_CPU,Aigo,Aigo DarkFlash Lair,Tipo Ventilador,27518,Media
+Cooler_CPU,Alseye,Alseye H120D,Tipo Ventilador,33443,Media
+Cooler_CPU,Alseye,Alseye M90 - Black,Tipo Ventilador,34982,Media
+Cooler_CPU,Alseye,Alseye Aurora 120T,Tipo Ventilador,84757,Baja
+Cooler_CPU,Alseye,Alseye M90 - White,Tipo Ventilador,30523,Media
+Cooler_CPU,Alseye,Alseye H4,Tipo Ventilador,53074,Media
+Cooler_CPU,Antec,Antec A30 Neo,Tipo Ventilador,92144,Media
+Cooler_CPU,Aerocool,Aerocool Cylon 4F BK,Tipo Ventilador,83761,Media
+Cooler_CPU,Alseye,Alseye Xtreme X360 White,Tipo Refrigeración líquida,76563,Alta
+Cooler_CPU,Airflow,Airflow COSMOS CryoVision 777 - Black,Tipo Refrigeración líquida,87519,Baja

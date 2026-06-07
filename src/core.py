@@ -13,9 +13,8 @@ from rich.rule import Rule
 from rich.live import Live
 
 from src.prompts import HARDIBOT_SYSTEM_PROMPT
-from src.rag_engine import HardiBotRAG
+from src.rag_engine import HardiBotRAG, CATALOGO_POR_DEFECTO
 
-# --- Importaciones Modernas (LangGraph + LangChain Core) ---
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
@@ -24,11 +23,9 @@ from langchain_core.messages import SystemMessage, HumanMessage, RemoveMessage
 load_dotenv(override=True)
 console = Console()
 
-# ── 1. Inicialización de RAG ─────────
-motor_rag = HardiBotRAG()
+motor_rag = HardiBotRAG(os.getenv("CATALOGO_PATH", CATALOGO_POR_DEFECTO))
 motor_rag.construir_indice()
 
-# ── 2. Configuración del Modelo ─────────
 llm = ChatOpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
     api_key=os.getenv("GITHUB_TOKEN"),
@@ -39,13 +36,7 @@ llm = ChatOpenAI(
 )
 
 
-# HerramientaRobusta es un envoltorio para manejar errores de forma elegante en las herramientas.
 class HerramientaRobusta:
-    """
-    Envoltorio para herramientas con manejo de errores robusto.
-    Implementa reintentos y degradación elegante.
-    """
-
     def __init__(self, nombre: str, funcion, max_reintentos: int = 3):
         self.nombre = nombre
         self.funcion = funcion
@@ -59,13 +50,11 @@ class HerramientaRobusta:
                 return str(resultado)
             except Exception as e:
                 ultimo_error = e
-                # Imprimimos en la consola el fallo temporal sin romper el programa
                 console.print(
                     f"[dim yellow]⚠️ Intento {intento} fallido en {self.nombre}: {e}[/dim yellow]"
                 )
-                time.sleep(0.5 * (2 ** (intento - 1)))  # Espera exponencial (backoff)
+                time.sleep(0.5 * (2 ** (intento - 1)))
 
-        # Degradación elegante: Le decimos al LLM qué pasó para que lo maneje
         return json.dumps(
             {
                 "error": f"La herramienta '{self.nombre}' falló tras {self.max_reintentos} intentos.",
@@ -75,7 +64,6 @@ class HerramientaRobusta:
         )
 
 
-# ── 3. Definición de Herramientas (Tools) ─────────
 @tool
 def buscar_catalogo(query: str) -> str:
     """
@@ -86,7 +74,6 @@ def buscar_catalogo(query: str) -> str:
     return envoltorio.ejecutar(query=query, top_k=5)
 
 
-# Evaluador matemático seguro basado en AST (reemplaza eval)
 _OPERADORES = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -152,18 +139,17 @@ def ver_carrito() -> str:
 
 
 herramientas = [buscar_catalogo, calcular_presupuesto, buscar_foto_componente, agregar_al_carrito, ver_carrito]
-# ── 4. Construcción del Agente (LangGraph) ─────────
+
 memoria = MemorySaver()
 
 agent_executor = create_react_agent(
     model=llm,
     tools=herramientas,
-    prompt=HARDIBOT_SYSTEM_PROMPT,  # <--- SOLUCIONADO
+    prompt=HARDIBOT_SYSTEM_PROMPT,
     checkpointer=memoria,
 )
 
 
-# ── 5. Interfaz y Streaming ─────────
 async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
     console.print(Rule(title="🤖 HardiBot", style="bold blue", align="left"))
     start_time = time.time()
@@ -174,12 +160,10 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
             console=console,
             refresh_per_second=15,
         ) as live:
-            # LangGraph usa un formato de "messages" y agrupa el historial por "thread_id"
             respuesta = agent_executor.invoke(
                 {"messages": [("user", user_input)]},
                 config={"configurable": {"thread_id": session_id}},
             )
-            # Imprime el último mensaje (la respuesta final del bot)
             live.update(Markdown(respuesta["messages"][-1].content))
     except Exception as e:
         console.print(f"\n[bold red]❌ Error:[/bold red] {e}")
@@ -204,54 +188,36 @@ def iniciar_loop():
 
 
 def chat_hardibot_stream_sync(user_input: str, session_id: str = "streamlit_session"):
-    """
-    Generador sincrono para Streamlit adaptado a LangGraph.
-    """
     respuesta = agent_executor.invoke(
         {"messages": [("user", user_input)]},
         config={"configurable": {"thread_id": session_id}},
     )
 
-    # Capturamos todos los mensajes de la conversación
     mensajes = respuesta["messages"]
     textos_ia = []
 
-    # Recorremos los mensajes de atrás hacia adelante hasta toparnos con tu pregunta
     for msg in reversed(mensajes):
         if msg.type == "human":
             break
-        # Si el mensaje es de la IA y tiene texto, lo guardamos (Aquí viene el plan + la respuesta)
         if msg.type == "ai" and msg.content:
             textos_ia.insert(0, msg.content)
 
-    # Unimos los textos (El plan de acción y la cotización final) separados por una línea
     texto_final = "\n\n---\n\n".join(textos_ia)
 
-    # Efecto de escritura para Streamlit
     for palabra in texto_final.split(" "):
         yield palabra + " "
         time.sleep(0.02)
 
 
-# ── 6. Resumen de Historial ─────────
 def resumir_historial(state: dict):
-    """
-    Nodo de LangGraph que resume el historial cuando es muy largo.
-    Cumple con el requerimiento de ConversationSummaryMemory.
-    """
     mensajes = state["messages"]
 
-    # Si la conversación tiene 6 mensajes o menos, no hacemos nada.
     if len(mensajes) <= 6:
         return {"messages": []}
 
-    # Extraemos el resumen existente (si hay uno) y los mensajes a resumir
     resumen_actual = state.get("summary", "")
-    mensajes_a_resumir = mensajes[
-        :-2
-    ]  # Dejamos intactos los últimos 2 mensajes de contexto
+    mensajes_a_resumir = mensajes[:-2]
 
-    # Prompt para que el LLM comprima la información
     prompt_resumen = (
         f"Este es el resumen actual de la conversación: {resumen_actual}\n\n"
         "Resume de forma muy concisa los siguientes mensajes nuevos, "
@@ -259,19 +225,14 @@ def resumir_historial(state: dict):
         "Combina el resumen actual con el nuevo."
     )
 
-    # Invocamos al LLM para que genere el nuevo resumen
     mensajes_prompt = [SystemMessage(content=prompt_resumen)] + mensajes_a_resumir
     respuesta_resumen = llm.invoke(mensajes_prompt)
 
-    # Le decimos a LangGraph que elimine los mensajes antiguos de la memoria
     mensajes_a_eliminar = [RemoveMessage(id=m.id) for m in mensajes_a_resumir]
 
-    # Actualizamos el estado con el nuevo resumen y eliminamos la basura
     return {"summary": respuesta_resumen.content, "messages": mensajes_a_eliminar}
 
 
-# ── 7. Carrito de Compras en Memoria ─────────
-# Clase con estado para mantener el inventario en memoria durante la sesión
 class CarritoCompras:
     def __init__(self):
         self.items = []
@@ -301,5 +262,4 @@ class CarritoCompras:
         return json.dumps({"items": self.items, "precio_total": total})
 
 
-# Instanciamos el carrito de forma global para la sesión
 carrito_hardibot = CarritoCompras()
