@@ -2,18 +2,13 @@ import pytest
 
 
 class TestDashboardMetrics:
-    def test_metrica_sin_api_key(self):
+    def test_metrica_sin_api_key(self, monkeypatch):
         from src.observability import get_dashboard_metrics
-        import os
-        key_original = os.environ.pop("LANGCHAIN_API_KEY", None)
-        if "LANGCHAIN_API_KEY" in os.environ:
-            del os.environ["LANGCHAIN_API_KEY"]
+        monkeypatch.delenv("LANGSMITH_API_KEY", raising=False)
+        monkeypatch.delenv("LANGCHAIN_API_KEY", raising=False)
 
         resultado = get_dashboard_metrics()
         assert resultado is None or resultado.get("status") == "no_api_key"
-
-        if key_original:
-            os.environ["LANGCHAIN_API_KEY"] = key_original
 
     def test_estimar_ahorro_con_metricas_ok(self):
         from src.observability import estimar_ahorro_tokens

@@ -6,9 +6,17 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 
+def _get_env(name_langsmith, name_legacy=None, default=None):
+    """Lee variable de entorno probando LANGSMITH_* primero, luego LANGCHAIN_*."""
+    val = os.getenv(name_langsmith)
+    if val is None and name_legacy:
+        val = os.getenv(name_legacy)
+    return val if val else default
+
+
 def get_langsmith_runs(limit=10):
     """Obtiene las últimas ejecuciones desde LangSmith."""
-    api_key = os.getenv("LANGCHAIN_API_KEY")
+    api_key = _get_env("LANGSMITH_API_KEY", "LANGCHAIN_API_KEY")
     if not api_key:
         return None
 
@@ -17,9 +25,9 @@ def get_langsmith_runs(limit=10):
 
         client = Client(
             api_key=api_key,
-            api_url=os.getenv("LANGCHAIN_ENDPOINT", "https://api.smith.langchain.com"),
+            api_url=_get_env("LANGSMITH_ENDPOINT", "LANGCHAIN_ENDPOINT", "https://api.smith.langchain.com"),
         )
-        project = os.getenv("LANGCHAIN_PROJECT", "ingenieria_soluciones_con_ia")
+        project = _get_env("LANGSMITH_PROJECT", "LANGCHAIN_PROJECT", "ingenieria_soluciones_con_ia")
         runs = list(client.list_runs(project_name=project, execution_order=1, limit=limit))
         return [_format_run(r) for r in runs]
     except Exception as e:
