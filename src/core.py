@@ -4,6 +4,7 @@ import asyncio
 import json
 import ast
 import operator
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
@@ -16,6 +17,7 @@ from src.rag_engine import HardiBotRAG
 from src.personas import PERSONAS, obtener_prompt
 
 from langchain_core.tools import tool
+from langchain_core.callbacks import BaseCallbackHandler
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import SystemMessage, RemoveMessage
@@ -24,6 +26,67 @@ load_dotenv(override=True)
 console = Console()
 
 MODELO_POR_DEFECTO = os.getenv("MODEL_NAME", "gpt-4o")
+
+
+class ToolCaptureHandler(BaseCallbackHandler):
+    """Captura el uso de herramientas del agente para mostrarlo en la UI."""
+
+    def __init__(self):
+        self.tool_calls = []
+        self._start_times = {}
+        self._current_step = 0
+
+    def on_tool_start(self, serialized, input_str, run_id=None, **kwargs):
+        name = serialized.get("name", "unknown")
+        self._current_step += 1
+        self._start_times[run_id] = time.time()
+        self.tool_calls.append({
+            "step": self._current_step,
+            "name": name,
+            "input": str(input_str)[:200],
+            "output": None,
+            "duration": None,
+            "status": "running",
+        })
+
+    def on_tool_end(self, output, run_id=None, **kwargs):
+        for tc in reversed(self.tool_calls):
+            if tc["output"] is None:
+                tc["output"] = str(output)[:300]
+                tc["duration"] = round(time.time() - self._start_times.get(run_id, time.time()), 2)
+                tc["status"] = "complete"
+                break
+
+
+def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_session"):
+    """Ejecuta el agente y retorna (tool_calls, response_text, metadata)."""
+    start = time.time()
+    handler = ToolCaptureHandler()
+
+    respuesta = app_state.agent.invoke(
+        {"messages": [("user", user_input)]},
+        config={
+            "configurable": {"thread_id": session_id},
+            "callbacks": [handler],
+        },
+    )
+
+    elapsed = round(time.time() - start, 2)
+    mensajes = respuesta["messages"]
+    textos_ia = []
+    for msg in reversed(mensajes):
+        if msg.type == "human":
+            break
+        if msg.type == "ai" and msg.content:
+            textos_ia.insert(0, msg.content)
+
+    metadata = {
+        "latencia": elapsed,
+        "total_mensajes": len(mensajes),
+        "herramientas_usadas": len(handler.tool_calls),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    return handler.tool_calls, "\n\n---\n\n".join(textos_ia), metadata
 
 
 class CarritoCompras:
