@@ -6,7 +6,7 @@ from typing import Optional
 from rich.console import Console
 from src.scrapers.base import CatalogScraper
 
-console = Console()
+console = Console(no_color=True, force_terminal=False)
 
 API_BASE = "https://api.solotodo.com"
 
