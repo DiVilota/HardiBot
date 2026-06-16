@@ -345,8 +345,10 @@ class HardiBotAppState:
 
 
 @tool
-def _buscar_catalogo(query: str) -> str:
-    """Usa esta herramienta SIEMPRE que el usuario pregunte por componentes, precios, stock o compatibilidad."""
+def _buscar_catalogo_local(query: str) -> str:
+    """Busca en el INVENTARIO LOCAL de HardiBot (catalogo FAISS interno).
+    NO busca en internet, Knasta, SoloTodo ni tiendas externas.
+    Usa esta herramienta para consultar productos disponibles en nuestro propio stock interno."""
     env = HerramientaRobusta("RAG_Catalogo", app_state.motor_rag.recuperar_contexto)
     return env.ejecutar(query=query, top_k=15)
 
@@ -424,7 +426,7 @@ def _ver_carrito() -> str:
     return app_state.carrito.ver()
 
 
-_TOOLS[:] = [_buscar_catalogo, _buscar_web, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
+_TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
 
 app_state = HardiBotAppState(os.getenv("PERSONA_ID", "hardware")).iniciar()
 

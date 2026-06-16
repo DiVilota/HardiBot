@@ -8,7 +8,7 @@ from src.sesiones import guardar_sesion, cargar_sesion, listar_sesiones, elimina
 AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
 TOOL_MESSAGES = {
-    "_buscar_catalogo": "📦 Revisando el inventario local...",
+    "_buscar_catalogo_local": "📦 Revisando el inventario local...",
     "_buscar_web": "🌐 Buscando en tiendas online...",
     "_calcular_presupuesto": "🧮 Calculando totales y descuentos...",
     "_buscar_foto_componente": "🖼️ Buscando imagen del producto...",
