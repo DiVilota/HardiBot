@@ -7,7 +7,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from rich.console import Console
 
-console = Console()
+console = Console(no_color=True, force_terminal=False)
 load_dotenv(override=True)
 
 CATALOGO_POR_DEFECTO = "data/catalogo_hardware.csv"
@@ -28,10 +28,10 @@ class HardiBotRAG:
             console.print(f"[red]Error al cargar Embeddings: {e}[/red]")
 
     def construir_indice(self):
-        console.print("[dim]⚙️ Iniciando ingesta de datos (RAG)...[/dim]")
+        console.print("[dim]Iniciando ingesta de datos (RAG)...[/dim]")
 
         if not os.path.exists(self.data_path):
-            console.print(f"[red]❌ No se encontró el catálogo en: {self.data_path}[/red]")
+            console.print(f"[red]No se encontro el catalogo en: {self.data_path}[/red]")
             return False
 
         df = pd.read_csv(self.data_path)
@@ -55,10 +55,10 @@ class HardiBotRAG:
 
         try:
             self.vector_store = FAISS.from_documents(documents, self.embeddings)
-            console.print(f"[bold green]✅ Índice Vectorial FAISS creado: {len(documents)} productos indexados.[/bold green]")
+            console.print(f"[bold green]Indice Vectorial FAISS creado: {len(documents)} productos indexados.[/bold green]")
             return True
         except Exception as e:
-            console.print(f"[bold red]❌ Error al vectorizar: {e}[/bold red]")
+            console.print(f"[bold red]Error al vectorizar: {e}[/bold red]")
             return False
 
     def recargar(self, data_path: str = None):
@@ -68,7 +68,7 @@ class HardiBotRAG:
 
     def recuperar_contexto(self, query: str, top_k: int = 15) -> str:
         if not self.vector_store:
-            console.print("[yellow]⚠️ Índice vacío. Construyendo índice primero...[/yellow]")
+            console.print("[yellow]Indice vacio. Construyendo indice primero...[/yellow]")
             self.construir_indice()
 
         query_lower = query.lower()
@@ -98,10 +98,10 @@ class HardiBotRAG:
                     f"Disponibilidad de Stock: {row['Stock']}"
                 )
                 fragmentos.append(frag)
-            console.print(f"[dim]🔍 Busqueda por keyword: {len(coincidencias)} coincidencias[/dim]")
+            console.print(f"[dim]Busqueda por keyword: {len(coincidencias)} coincidencias[/dim]")
             return "\n---\n".join(fragmentos)
 
-        console.print("[dim]🔍 Sin coincidencias directas, usando FAISS...[/dim]")
+        console.print("[dim]Sin coincidencias directas, usando FAISS...[/dim]")
         resultados = self.vector_store.similarity_search(query, k=top_k)
 
         contexto = "\n---\n".join([doc.page_content for doc in resultados])

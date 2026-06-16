@@ -188,7 +188,7 @@ class SoloTodoScraper(CatalogScraper):
             if precios:
                 return int(sum(precios) / len(precios))
         except Exception as e:
-            console.print(f"[dim]⚠️ No se pudo obtener precio real para producto {product_id}: {e}[/dim]")
+            console.print(f"[dim]! No se pudo obtener precio real para producto {product_id}: {e}[/dim]")
         return self._generar_precio_realista(categoria)
 
     def _generar_precio_realista(self, categoria: str) -> int:
@@ -216,12 +216,12 @@ class SoloTodoScraper(CatalogScraper):
         todas_filas = []
 
         for categoria_nombre, cat_id in CATEGORIAS_HARDWARE.items():
-            console.print(f"[bold cyan]📦 Scrapeando: {categoria_nombre} (ID {cat_id})...[/bold cyan]")
+            console.print(f"[bold cyan]Scrapeando: {categoria_nombre} (ID {cat_id})...[/bold cyan]")
             try:
                 data = self._fetch_products_page(cat_id)
                 productos = data.get("results", [])
                 total = data.get("count", 0)
-                console.print(f"  → {total} productos encontrados. Tomando {min(max_por_categoria, len(productos))}...")
+                console.print(f"  - {total} productos encontrados. Tomando {min(max_por_categoria, len(productos))}...")
 
                 random.shuffle(productos)
                 for prod in productos[:max_por_categoria]:
@@ -253,7 +253,7 @@ class SoloTodoScraper(CatalogScraper):
                     })
                 time.sleep(0.3)
             except Exception as e:
-                console.print(f"[yellow]⚠️ Error scrapeando {categoria_nombre}: {e}[/yellow]")
+                console.print(f"[yellow]! Error scrapeando {categoria_nombre}: {e}[/yellow]")
 
         if not todas_filas:
             raise RuntimeError("No se obtuvieron productos de SoloTodo.")
@@ -261,5 +261,5 @@ class SoloTodoScraper(CatalogScraper):
         df = pd.DataFrame(todas_filas)
         df = self.validar_dataframe(df)
         df.to_csv(output_path, index=False)
-        console.print(f"[bold green]✅ Catálogo SoloTodo guardado: {output_path} ({len(df)} productos)[/bold green]")
+        console.print(f"[bold green]Catalogo SoloTodo guardado: {output_path} ({len(df)} productos)[/bold green]")
         return output_path

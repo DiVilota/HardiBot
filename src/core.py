@@ -20,7 +20,6 @@ from langchain_core.tools import tool
 from langchain_core.callbacks import BaseCallbackHandler
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.messages import SystemMessage, RemoveMessage
 
 load_dotenv(override=True)
 console = Console()
@@ -369,19 +368,3 @@ def chat_hardibot_stream_sync(user_input: str, session_id: str = "streamlit_sess
         time.sleep(0.02)
 
 
-def resumir_historial(state: dict):
-    mensajes = state["messages"]
-    if len(mensajes) <= 6:
-        return {"messages": []}
-    resumen_actual = state.get("summary", "")
-    mensajes_a_resumir = mensajes[:-2]
-    prompt_resumen = (
-        f"Este es el resumen actual de la conversacion: {resumen_actual}\n\n"
-        "Resume de forma muy concisa los siguientes mensajes nuevos, "
-        "enfocandote en los productos mencionados y las intenciones del usuario. "
-        "Combina el resumen actual con el nuevo."
-    )
-    mensajes_prompt = [SystemMessage(content=prompt_resumen)] + mensajes_a_resumir
-    respuesta_resumen = app_state.llm.invoke(mensajes_prompt)
-    mensajes_a_eliminar = [RemoveMessage(id=m.id) for m in mensajes_a_resumir]
-    return {"summary": respuesta_resumen.content, "messages": mensajes_a_eliminar}

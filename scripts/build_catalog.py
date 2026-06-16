@@ -19,7 +19,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from rich.console import Console
 from rich.rule import Rule
 from src.scrapers import SoloTodoScraper, SyntheticCatalogGenerator, KnastaScraper
-from src.rag_engine import HardiBotRAG
 
 console = Console(no_color=True, force_terminal=False)
 
@@ -32,9 +31,9 @@ def build_catalog(source: str, max_per_category: int, output_path: str, preserve
         return
 
     os.environ.setdefault("PYTHONIOENCODING", "utf-8")
-    console.print(Rule(title="HardiBot - Generador de Catalogo", style="bold green"))
+    console.print(Rule(title="HardiBot - Generador de Catalogo"))
     console.print(f"  Fuente: {source}")
-    console.print(f"  Máx por categoría: {max_per_category}")
+    console.print(f"  Max por categoria: {max_per_category}")
     console.print(f"  Salida: {output_path}\n")
 
     if source == "solotodo":
@@ -79,12 +78,13 @@ def build_catalog(source: str, max_per_category: int, output_path: str, preserve
         total = sum(1 for _ in f) - 1
     console.print(f"\n[bold]Total de productos: {total}[/bold]")
 
-    console.print("\n[bold cyan]⚡ Reconstruyendo índice FAISS...[/bold cyan]")
+    console.print("\n[bold cyan]Reconstruyendo indice FAISS...[/bold cyan]")
+    from src.rag_engine import HardiBotRAG
     rag = HardiBotRAG(data_path=output_path)
     if rag.construir_indice():
-        console.print("[bold green]✅ Índice FAISS actualizado exitosamente[/bold green]")
+        console.print("[bold green]Indice FAISS actualizado exitosamente[/bold green]")
     else:
-        console.print("[bold red]❌ Error al reconstruir índice FAISS[/bold red]")
+        console.print("[bold red]Error al reconstruir indice FAISS[/bold red]")
         sys.exit(1)
 
 

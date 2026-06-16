@@ -1,120 +1,106 @@
 Categoria,Marca,Modelo,Especificaciones,Precio_CLP,Stock
-Procesador,AMD,Ryzen 5 7600,AM5 6-Cores 12-Threads 3.8GHz 65W DDR5,250368,Media
-Procesador,AMD,Ryzen 3 4100,AM4 4-Cores 8-Threads 3.8GHz,93470,Alta
-Procesador,AMD,Ryzen 9 9950X,AM5 16-Cores 32-Threads 4.3GHz 170W,649833,Baja
-Procesador,Intel,Core Ultra 9 285K,LGA1851 24-Cores 24-Threads 3.7GHz 125W,683644,Alta
-Procesador,Intel,Core i9-14900K,LGA1700 24-Cores 32-Threads 3.2GHz 253W,610404,Alta
-Procesador,AMD,Ryzen 5 5600G,AM4 6-Cores 12-Threads 3.9GHz con graficos Radeon,136744,Media
-Procesador,Intel,Core i5-14400F,LGA1700 10-Cores 16-Threads 2.5GHz 65W,179486,Alta
-Procesador,AMD,Ryzen 5 5600,AM4 6-Cores 12-Threads 3.5GHz 65W,136051,Alta
-Procesador,Intel,Core Ultra 5 225H,LGA1851 14-Cores 18-Threads 3.3GHz,266813,Alta
-Procesador,Intel,Core i5-12400F,LGA1700 6-Cores 12-Threads 2.5GHz 65W,123985,Alta
-Procesador,AMD,Ryzen 7 9800X3D,AM5 8-Cores 16-Threads 4.7GHz 120W 3D V-Cache,596452,Alta
-Procesador,Intel,Core Ultra 7 265K,LGA1851 20-Cores 20-Threads 3.3GHz 125W,431386,Media
-Procesador,AMD,Ryzen 9 7950X,AM5 16-Cores 32-Threads 4.5GHz 170W,560086,Alta
-Procesador,AMD,Ryzen 7 7800X3D,AM5 8-Cores 16-Threads 4.2GHz 120W 3D V-Cache,365998,Alta
-Procesador,Intel,Core i3-14100F,LGA1700 4-Cores 8-Threads 3.5GHz 60W,87741,Media
-Procesador,AMD,Ryzen 7 5700X3D,AM4 8-Cores 16-Threads 3.0GHz 105W 3D V-Cache,307172,Baja
-Procesador,Intel,Core i5-14600K,LGA1700 14-Cores 20-Threads 3.5GHz 125W,332721,Alta
-Procesador,Intel,Core i7-14700K,LGA1700 20-Cores 28-Threads 3.4GHz 125W,435900,Baja
-Placa_Madre,Asus,TUF B550M-PLUS WIFI,AM4 Micro-ATX DDR4 PCIe 4.0 WIFI,142727,Media
-Placa_Madre,Asus,ROG STRIX Z790-E GAMING,LGA1700 ATX DDR5 PCIe 5.0 Premium,384328,Media
-Placa_Madre,ASRock,B450M-HDV R4.0,AM4 Micro-ATX DDR4,53428,Media
-Placa_Madre,Asus,ROG STRIX B650-A GAMING,AM5 ATX DDR5 PCIe 4.0,208078,Alta
-Placa_Madre,Gigabyte,B760M DS3H DDR4,LGA1700 Micro-ATX DDR4,91493,Alta
-Placa_Madre,Asus,TUF GAMING X670E-PLUS WIFI,AM5 ATX DDR5 PCIe 5.0,301502,Baja
-Placa_Madre,Asus,TUF B450M-PLUS II,AM4 Micro-ATX DDR4 PCIe 3.0,91398,Alta
-Placa_Madre,ASRock,B650M-HDV/M.2,AM5 Micro-ATX DDR5 PCIe 4.0,128885,Alta
-Placa_Madre,MSI,MPG X670E CARBON WIFI,AM5 ATX DDR5 PCIe 5.0,487309,Alta
-Placa_Madre,Gigabyte,Z790 AORUS ELITE AX,LGA1700 ATX DDR5 PCIe 5.0,266833,Alta
-Placa_Madre,MSI,MAG Z790 TOMAHAWK MAX WIFI,LGA1700 ATX DDR5 PCIe 5.0,313804,Alta
-Placa_Madre,MSI,PRO H610M-G DDR4,LGA1700 Micro-ATX DDR4,66099,Baja
-Placa_Madre,Gigabyte,B650M AORUS ELITE,AM5 Micro-ATX DDR5,161680,Alta
-Placa_Madre,MSI,PRO B650-P WIFI,AM5 ATX DDR5 PCIe 4.0,203408,Media
-Placa_Madre,Asus,Prime A320M-K,AM4 Micro-ATX DDR4 PCIe 3.0 Basica,50500,Alta
-Tarjeta_Video,NVIDIA,RTX 4060 Ti 8GB,DLSS 3.0 1080p-1440p Alto,435143,Alta
-Tarjeta_Video,NVIDIA,RTX 4070 12GB,DLSS 3.0 Ideal 1440p Ultra,603096,Baja
-Tarjeta_Video,AMD,Radeon RX 7900 GRE 16GB,1440p-4K FSR 3,684917,Media
-Tarjeta_Video,AMD,Radeon RX 6600 8GB,1080p Alto Eficiente,210914,Alta
-Tarjeta_Video,AMD,Radeon RX 7900 XTX 24GB,4K Ultra FSR 3 Supremo,1080778,Baja
-Tarjeta_Video,NVIDIA,RTX 4070 Ti SUPER 16GB,DLSS 3.0 1440p-4K,887345,Baja
-Tarjeta_Video,AMD,Radeon RX 7700 XT 12GB,1440p Alto FSR 3,452528,Media
-Tarjeta_Video,NVIDIA,RTX 4080 SUPER 16GB,DLSS 3.0 Ideal 4K Ultra,967346,Media
-Tarjeta_Video,NVIDIA,RTX 4090 24GB,DLSS 3.0 Supremo 4K 8K,2350334,Media
-Tarjeta_Video,AMD,Radeon RX 7800 XT 16GB,1440p Ultra FSR 3,545073,Media
-Tarjeta_Video,AMD,Radeon RX 7600 8GB,1080p Ultra Competitivo,265708,Baja
-Tarjeta_Video,NVIDIA,RTX 4060 8GB,DLSS 3.0 Ideal para 1080p Ultra,347035,Baja
-Memoria_RAM,G.Skill,Ripjaws V 16GB (2x8GB) DDR4,3600MHz CL16,52319,Baja
-Memoria_RAM,Corsair,Vengeance LPX 16GB (2x8GB) DDR4,3200MHz CL16,49301,Media
-Memoria_RAM,Corsair,Dominator Titanium 32GB (2x16GB) DDR5,7200MHz CL34 RGB,175778,Media
-Memoria_RAM,Kingston,Fury Beast 8GB (1x8GB) DDR4,3200MHz CL16,19608,Alta
-Memoria_RAM,Kingston,Fury Beast 16GB (2x8GB) DDR4,3200MHz CL16,48265,Media
-Memoria_RAM,Kingston,Fury Beast 32GB (2x16GB) DDR5,5200MHz CL40,103822,Baja
-Memoria_RAM,Corsair,Vengeance 32GB (2x16GB) DDR5,6000MHz CL30 Optimizado AMD EXPO,141892,Media
-Memoria_RAM,G.Skill,Trident Z5 RGB 64GB (2x32GB) DDR5,6400MHz CL32,234582,Alta
-Memoria_RAM,Corsair,Vengeance 64GB (2x32GB) DDR5,5600MHz CL40,181009,Alta
-Memoria_RAM,Kingston,Fury Beast 32GB (2x16GB) DDR5 RGB,6000MHz CL36,118791,Media
-Memoria_RAM,G.Skill,Trident Z5 NEO 32GB (2x16GB) DDR5,6000MHz CL30 AMD EXPO,137689,Alta
-Memoria_RAM,Kingston,Fury Renegade 64GB (2x32GB) DDR5,6400MHz CL32,189883,Media
-Almacenamiento,Western Digital,WD Black SN850X 1TB,NVMe M.2 PCIe 4.0 7300MB/s,105823,Media
-Almacenamiento,Samsung,870 EVO 500GB,SATA III 2.5 560MB/s,53823,Media
-Almacenamiento,Samsung,870 EVO 1TB,SATA III 2.5 560MB/s,80630,Media
-Almacenamiento,Kingston,KC3000 1TB,NVMe M.2 PCIe 4.0 7000MB/s,98141,Alta
-Almacenamiento,Kingston,NV2 1TB,NVMe M.2 PCIe 4.0 3500MB/s,67066,Alta
-Almacenamiento,Crucial,MX500 1TB,SATA III 2.5 560MB/s,68755,Baja
-Almacenamiento,Samsung,990 Pro 1TB,NVMe M.2 PCIe 4.0 7450MB/s,132070,Media
-Almacenamiento,Crucial,BX500 480GB,SATA III 2.5 540MB/s,32935,Alta
-Almacenamiento,Kingston,NV3 2TB,NVMe M.2 PCIe 4.0 6000MB/s,151618,Baja
-Almacenamiento,Western Digital,WD Black SN770 1TB,NVMe M.2 PCIe 4.0 5150MB/s,87576,Alta
-Almacenamiento,Samsung,980 Pro 1TB,NVMe M.2 PCIe 4.0 7000MB/s,115834,Alta
-Almacenamiento,Crucial,T500 1TB,NVMe M.2 PCIe 4.0 7300MB/s,112403,Media
-Almacenamiento,Western Digital,WD Black SN850X 2TB,NVMe M.2 PCIe 4.0 7300MB/s,209604,Alta
-Almacenamiento,Kingston,NV2 500GB,NVMe M.2 PCIe 4.0 3500MB/s,40340,Baja
-Almacenamiento,Western Digital,WD Blue SN570 500GB,NVMe M.2 PCIe 3.0 3500MB/s,41381,Media
-Almacenamiento,Samsung,990 Pro 2TB,NVMe M.2 PCIe 4.0 7450MB/s,262110,Alta
-Fuente_Poder,Corsair,CX550,550W 80 Plus Bronze,59088,Baja
-Fuente_Poder,Corsair,RM750e,750W 80 Plus Gold Full Modular ATX 3.0,109010,Media
-Fuente_Poder,Corsair,RM650,650W 80 Plus Gold Full Modular,103689,Baja
-Fuente_Poder,EVGA,500 W1,500W 80 Plus White No Modular,45501,Media
-Fuente_Poder,EVGA,600 BR,600W 80 Plus Bronze,51202,Alta
-Fuente_Poder,EVGA,750 GQ,750W 80 Plus Gold Semi Modular,103905,Media
-Fuente_Poder,Cooler Master,V850 SFX Gold,850W 80 Plus Gold SFX,166392,Media
-Fuente_Poder,Cooler Master,MWE 750 V2,750W 80 Plus Gold,80206,Media
-Fuente_Poder,Corsair,CV450,450W 80 Plus Bronze,45025,Baja
-Fuente_Poder,EVGA,850 G7,850W 80 Plus Gold Full Modular,121093,Baja
-Fuente_Poder,Corsair,HX1000i,1000W 80 Plus Platinum Full Modular,201524,Alta
-Fuente_Poder,Corsair,RM850x,850W 80 Plus Gold Full Modular,147756,Media
-Fuente_Poder,Cooler Master,MWE 550 V2,550W 80 Plus Bronze,49246,Alta
-Gabinete,Lian Li,LANCOOL 216,ATX Mid Tower Alto Flujo,90035,Alta
-Gabinete,Corsair,Obsidian 1000D,Full Tower Super Tower E-ATX,465452,Alta
-Gabinete,Corsair,4000D Airflow,ATX Mid Tower Vidrio Templado,81875,Media
-Gabinete,Corsair,5000D Airflow,ATX Mid Tower Panel Malla,118886,Media
-Gabinete,Lian Li,O11 Dynamic EVO,ATX Mid Tower Dual Chamber,181448,Baja
-Gabinete,NZXT,H6 Flow,ATX Mid Torre Dual Chamber,100611,Alta
-Gabinete,NZXT,H5 Flow,ATX Mid Tower Minimalista,76243,Baja
-Gabinete,Corsair,6500X,ATX Mid Tower Dual Chamber,215234,Baja
-Gabinete,NZXT,H9 Elite,ATX Mid Torre Panoramica,214259,Alta
-Gabinete,Lian Li,LANCOOL 205M,Micro-ATX Mesh,58671,Media
-Gabinete,NZXT,H7 Elite,ATX Mid Tower Premium Cristal,168685,Baja
-Monitor,ASUS,ROG Swift PG27AQDM,27 OLED 1440p 240Hz,715852,Media
-Monitor,ASUS,TUF VG249Q1A,23.8 IPS 1080p 165Hz,182616,Alta
-Monitor,LG,UltraGear 24GN60R,24 IPS 1080p 165Hz 1ms,195101,Alta
-Monitor,Samsung,Odyssey G3 LF24,24 VA 1080p 165Hz FreeSync,164621,Baja
-Monitor,Samsung,Odyssey G5 27,27 VA 1440p 144Hz Curvo,299381,Alta
-Monitor,ASUS,TUF VG27AQ3A,27 IPS 1440p 180Hz,315108,Alta
-Monitor,LG,UltraGear 27GP850,27 Nano IPS 1440p 180Hz,315248,Baja
-Monitor,LG,UltraGear 32GP850,32 Nano IPS 1440p 165Hz,431517,Alta
-Monitor,Samsung,Odyssey G7 32,32 VA 1440p 240Hz Curvo,471710,Media
-Monitor,LG,UltraGear 27GP950,27 IPS 4K 160Hz HDMI 2.1,670165,Alta
-Monitor,Samsung,Odyssey Neo G8 32,32 VA 4K 240Hz Mini LED,686286,Baja
-Cooler_CPU,Cooler Master,MasterLiquid ML360 ION,Liquida 360mm Pantalla LCD,160533,Baja
-Cooler_CPU,Corsair,H100i RGB Elite,Liquida 240mm 170W TDP,103971,Alta
-Cooler_CPU,Cooler Master,Hyper 212 Spectrum V3,Torre Simple 120mm 150W TDP,31089,Media
-Cooler_CPU,DeepCool,AK400,Torre Simple 120mm 220W TDP,28934,Media
-Cooler_CPU,Noctua,NH-D15,Torre Doble 140mm Premium 250W TDP,111317,Baja
-Cooler_CPU,DeepCool,AK620,Torre Doble 120mm 260W TDP,71159,Baja
-Cooler_CPU,Cooler Master,MasterLiquid ML240L V2,Liquida 240mm ARGB,81386,Alta
-Cooler_CPU,Noctua,NH-D12L,Torre Simple 120mm Cromax,69937,Baja
-Cooler_CPU,Corsair,H150i Elite Capellix,Liquida 360mm RGB Premium,144988,Media
-Cooler_CPU,Corsair,H170i Elite Capellix,Liquida 420mm RGB Premium,196533,Baja
-Cooler_CPU,DeepCool,LT720,Liquida 360mm Pantalla RGB,142624,Media
+Procesador,Amd,"Procesador AMD Ryzen 5 8600G, 6-Core, 4.3GHz, Socket AM5 65W, Radeon Graphics","Procesador AMD Ryzen 5 8600G, 6-Core, 4.3GHz, Socket AM5 65W, Radeon Graphics",218990,Alta
+Procesador,Amd,Procesador Gamer AMD A10-6800K con Gráficos Radeon HD 8670D,Procesador Gamer AMD A10-6800K con Gráficos Radeon HD 8670D,99990,Alta
+Procesador,Intel,Procesador Intel Core i7-6700 de 4 GHz y 4 Núcleos con Gráficos HD 530,Procesador Intel Core i7-6700 de 4 GHz y 4 Núcleos con Gráficos HD 530,139990,Alta
+Procesador,Amd,"Procesador gamer AMD Ryzen 7 3700X 8 núcleos , 3.6GHz (4.4 MAX Boost) Socket AM4","Procesador gamer AMD Ryzen 7 3700X 8 núcleos , 3.6GHz (4.4 MAX Boost) Socket AM4",167191,Alta
+Procesador,Amd,Procesador gamer AMD Ryzen 3 3200G YD3200C5FHBOX de 4 núcleos y 4GHz de frecuencia con gráfica integrada,Procesador gamer AMD Ryzen 3 3200G YD3200C5FHBOX de 4 núcleos y 4GHz de frecuencia con gráfica integrada,82900,Alta
+Procesador,Intel,Procesador Intel Core i7-6700K 4.2GHz 4 Núcleos Gráfica Integrada,Procesador Intel Core i7-6700K 4.2GHz 4 Núcleos Gráfica Integrada,159990,Alta
+Procesador,Amd,Procesador gamer AMD Ryzen 5 3400G YD3400C5FHBOX de 4 núcleos y 4.2GHz de frecuencia con gráfica integrada,Procesador gamer AMD Ryzen 5 3400G YD3400C5FHBOX de 4 núcleos y 4.2GHz de frecuencia con gráfica integrada,96900,Alta
+Procesador,Intel,Core i3-10100 Procesador 4 Núcleos 4.3GHz Gráfica UHD 630,Intel Core i3-10100 Procesador 4 Núcleos 4.3GHz Gráfica UHD 630,161900,Alta
+Procesador,Amd,Procesador AMD Ryzen 7 5700G 100-100000263BOX de 8 núcleos y 4.6GHz de frecuencia con gráfica integrada,Procesador AMD Ryzen 7 5700G 100-100000263BOX de 8 núcleos y 4.6GHz de frecuencia con gráfica integrada,234900,Alta
+Procesador,Intel,Procesador gamer Intel Core I9-12900KF BX8071512900KF de 16 núcleos y 5.2GHz de frecuencia con gráfica integrada,Procesador gamer Intel Core I9-12900KF BX8071512900KF de 16 núcleos y 5.2GHz de frecuencia con gráfica integrada,418491,Alta
+Procesador,Intel,Procesador Intel Core i5-12400F 6 núcleos 4.4GHz LGA 1700 DDR5 Alder Lake,Procesador Intel Core i5-12400F 6 núcleos 4.4GHz LGA 1700 DDR5 Alder Lake,209990,Alta
+Procesador,Amd,Procesador gamer AMD A10-Series A10-7870K AD787KXDJCSBX de 4 núcleos y 4.1GHz de frecuencia con gráfica integrada,Procesador gamer AMD A10-Series A10-7870K AD787KXDJCSBX de 4 núcleos y 4.1GHz de frecuencia con gráfica integrada,129990,Alta
+Procesador,Intel,Procesador Intel Core i7-12700 12 núcleos 4.9GHz UHD Graphics 770,Procesador Intel Core i7-12700 12 núcleos 4.9GHz UHD Graphics 770,409900,Alta
+Procesador,Amd,Procesador gamer AMD Ryzen 9 7950X 100-100000514WOF de 16 núcleos y 5.7GHz de frecuencia con gráfica integrada,Procesador gamer AMD Ryzen 9 7950X 100-100000514WOF de 16 núcleos y 5.7GHz de frecuencia con gráfica integrada,729990,Alta
+Procesador,Amd,Procesador gamer AMD Ryzen 7 7700X 100-100000591WOF de 8 núcleos y 5.4GHz de frecuencia con gráfica integrada,Procesador gamer AMD Ryzen 7 7700X 100-100000591WOF de 8 núcleos y 5.4GHz de frecuencia con gráfica integrada,427990,Alta
+Tarjeta_Video,Msi,Tarjeta de Video Nvidia GeForce MSI RTX 5050 8G Shadow 2X OC 8GB GDDR6,Tarjeta de Video Nvidia GeForce MSI RTX 5050 8G Shadow 2X OC 8GB GDDR6,347990,Alta
+Tarjeta_Video,Msi,Tarjeta de Video Nvidia Geforce RTX 5070 12G VENTUS 3X OC,Tarjeta de Video Nvidia Geforce RTX 5070 12G VENTUS 3X OC,799990,Alta
+Tarjeta_Video,,Tarjeta Vertical Riser Usb 3.0 1-16x Pci-e Molex Miner V006c,Tarjeta Vertical Riser Usb 3.0 1-16x Pci-e Molex Miner V006c,9990,Alta
+Tarjeta_Video,,Tarjeta De Video Gigabyte Rtx 5060 Ti Eagle Oc 8gb Ice,Tarjeta De Video Gigabyte Rtx 5060 Ti Eagle Oc 8gb Ice,597990,Alta
+Tarjeta_Video,Palit,Tarjeta de Video Palit GeForce RTX 3050 6GB GDDR6 PCIe 4.0 8K Nvidia,Tarjeta de Video Palit GeForce RTX 3050 6GB GDDR6 PCIe 4.0 8K Nvidia,271990,Alta
+Tarjeta_Video,Quadro,Tarjeta De Vídeo Nvidia Quadro K600 Para Ps Cad Oficina,Tarjeta De Vídeo Nvidia Quadro K600 Para Ps Cad Oficina,28900,Alta
+Tarjeta_Video,Zotac,Tarjeta de Video Nvidia GeForce Zotac RTX 5060Ti TwinEdge OC 16GB GDDR7,Tarjeta de Video Nvidia GeForce Zotac RTX 5060Ti TwinEdge OC 16GB GDDR7,724990,Alta
+Tarjeta_Video,Msi,Tarjeta de Video Nvidia GeForce MSI RTX 5070 12G Ventus 3X OC 12GB GDDR7,Tarjeta de Video Nvidia GeForce MSI RTX 5070 12G Ventus 3X OC 12GB GDDR7,753990,Alta
+Tarjeta_Video,Msi,Tarjeta Madre Msi Mag B760 Tomahawk Wifi Socket 1700 Color Negro,Tarjeta Madre Msi Mag B760 Tomahawk Wifi Socket 1700 Color Negro,304900,Alta
+Tarjeta_Video,Msi,Tarjeta gráfica Nvidia MSI Ventus OC EDITION PLUS RTX 5060 Ti OC Edition 8GB,Tarjeta gráfica Nvidia MSI Ventus OC EDITION PLUS RTX 5060 Ti OC Edition 8GB,577990,Alta
+Tarjeta_Video,,Stream Deck Redragon Ragnaros Ss-552 10 Botones Negro,Stream Deck Redragon Ragnaros Ss-552 10 Botones Negro,120990,Alta
+Tarjeta_Video,Gt,Tarjeta Video Gt 610 2gb Ddr3 128bit Pci-e 3.0,Tarjeta Video Gt 610 2gb Ddr3 128bit Pci-e 3.0,89990,Alta
+Tarjeta_Video,,Msi Tarjeta Madre Pro H610m-g Ddr5 Socket 1700,Msi Tarjeta Madre Pro H610m-g Ddr5 Socket 1700,101400,Alta
+Tarjeta_Video,Zotac,Tarjeta de Video Zotac NV-GF-GT730 4GB DDR3 PCIe HDMI DVI VGA Low Profile Pasivo,Tarjeta de Video Zotac NV-GF-GT730 4GB DDR3 PCIe HDMI DVI VGA Low Profile Pasivo,109990,Alta
+Tarjeta_Video,Genérica,Tarjeta Adaptador Doble Sonido Usb Stereo Audio + Microfono,Tarjeta Adaptador Doble Sonido Usb Stereo Audio + Microfono,4990,Alta
+Placa_Madre,Msi,Tarjeta Madre MSI PRO H610M-G DDR4 LGA1700 12°G 2*DDR4 M.2 DP HDMI VGA PS2 mATX,Tarjeta Madre MSI PRO H610M-G DDR4 LGA1700 12°G 2*DDR4 M.2 DP HDMI VGA PS2 mATX,79990,Alta
+Placa_Madre,Gen,FUENTE PODER MAX-60W-24 2.5A 24VDC,FUENTE PODER MAX-60W-24 2.5A 24VDC,24990,Alta
+Placa_Madre,Gen,FUENTE PODER MAX-250W-24 10A 24VDC,FUENTE PODER MAX-250W-24 10A 24VDC,37990,Alta
+Placa_Madre,Gen,FUENTE PODER MAX-60W-12 5A 12VDC ELECTRONI,FUENTE PODER MAX-60W-12 5A 12VDC ELECTRONI,28990,Alta
+Placa_Madre,Gen,AUTO TRANSFORMADOR  GFC100W 220/110V,AUTO TRANSFORMADOR  GFC100W 220/110V,22990,Alta
+Placa_Madre,Gen,AUTO TRANSFORMADOR 220/110V GFC200W,AUTO TRANSFORMADOR 220/110V GFC200W,27990,Alta
+Placa_Madre,Gen,GFC300W AUTO TRANSFORMADOR 220/110V,GFC300W AUTO TRANSFORMADOR 220/110V,32990,Alta
+Placa_Madre,Gen,GFC500W AUTO TRANSFORMADOR 220/110V,GFC500W AUTO TRANSFORMADOR 220/110V,39990,Alta
+Placa_Madre,Electro Harmonix,Pedal Sintetizador Electro-Harmonix Mono Synth Para Guitarra Con 11 Sonidos ,Pedal Sintetizador Electro-Harmonix Mono Synth Para Guitarra Con 11 Sonidos ,189990,Alta
+Placa_Madre,Guitto,Pedalboard Mediano Para Guitarra Con Sistema De Clipe  Guitto Gpb02,Pedalboard Mediano Para Guitarra Con Sistema De Clipe  Guitto Gpb02,109990,Alta
+Placa_Madre,,Raspberry 340 G Campoverde,Raspberry 340 G Campoverde,5590,Alta
+Placa_Madre,Hp,"Cargador De Notebook 4,5mm 65w Inteligente Hp 220v Negro","Cargador De Notebook 4,5mm 65w Inteligente Hp 220v Negro",17149,Alta
+Placa_Madre,Generac,Gabinete De Computadora Ds900 Atx De Vidrio Templado Negro,Gabinete De Computadora Ds900 Atx De Vidrio Templado Negro,63990,Alta
+Placa_Madre,Clio,Gabinete Clio Slim Cl-s613 Con Fuente De Poder 600w,Gabinete Clio Slim Cl-s613 Con Fuente De Poder 600w,75900,Alta
+Placa_Madre,Clio,Gabinete Slim Clio Cl-s605 Full Con Fuente De Poder 500w,Gabinete Slim Clio Cl-s605 Full Con Fuente De Poder 500w,65900,Alta
+Memoria_RAM,Corsair,"Memoria Ram Corsair Vengeance Rgb Black, Ddr5, 8gb, 5200mt/s","Memoria Ram Corsair Vengeance Rgb Black, Ddr5, 8gb, 5200mt/s",134990,Alta
+Memoria_RAM,Kingston,Memoria RAM DDR5 8GB 6000 MHz Fury Beast Black EXPO UDIMM,Memoria RAM DDR5 8GB 6000 MHz Fury Beast Black EXPO UDIMM,169990,Alta
+Memoria_RAM,,Dimm 16 Gb - Ddr5 6000 Mhz - Xpg Lancer Blade White,Dimm 16 Gb - Ddr5 6000 Mhz - Xpg Lancer Blade White,249990,Alta
+Memoria_RAM,Corsair,Memorias Ram Corsair Vengeance Rgb 32gb Ddr5-6400,Memorias Ram Corsair Vengeance Rgb 32gb Ddr5-6400,699990,Alta
+Memoria_RAM,Kingston,Memoria RAM 8GB DDR4 3200MHz DIMM CL22 Non-ECC 1.2V 288p - Kingston,Memoria RAM 8GB DDR4 3200MHz DIMM CL22 Non-ECC 1.2V 288p - Kingston,71990,Alta
+Memoria_RAM,Corsair,Memoria RAM 8GB DDR4 3200MHz DIMM CL16 Non-ECC 1.35v 288p Corsair Vengeance LPX,Memoria RAM 8GB DDR4 3200MHz DIMM CL16 Non-ECC 1.35v 288p Corsair Vengeance LPX,78990,Alta
+Memoria_RAM,Crucial,Memoria RAM 8GB DDR4 3200MHz DIMM CL22 Non-ECC 1.2V 288p - Crucial,Memoria RAM 8GB DDR4 3200MHz DIMM CL22 Non-ECC 1.2V 288p - Crucial,69990,Alta
+Memoria_RAM,Crucial,Memoria RAM 32GB DDR4 3200MHz SO-DIMM CL22 No-ECC 1.2V 260p - Crucial,Memoria RAM 32GB DDR4 3200MHz SO-DIMM CL22 No-ECC 1.2V 260p - Crucial,279990,Alta
+Memoria_RAM,Kingston,Memoria Ram Kingston 32 Gb 5600mhz Ddr5 Sodimm,Memoria Ram Kingston 32 Gb 5600mhz Ddr5 Sodimm,289980,Alta
+Memoria_RAM,Samsung,Memoria Ram Samsung 16gb Ddr4 Pc4-21300 2666mhz Pc Escritori,Memoria Ram Samsung 16gb Ddr4 Pc4-21300 2666mhz Pc Escritori,134990,Alta
+Memoria_RAM,Kingston,Memoria Ram Ddr4-3200 8gb Kingston Kvr32s22s8/8 Notebook,Memoria Ram Ddr4-3200 8gb Kingston Kvr32s22s8/8 Notebook,74990,Alta
+Memoria_RAM,,Kingston Fury Ram 8gb 3200mhz Ddr4 Dimm Beast Black,Kingston Fury Ram 8gb 3200mhz Ddr4 Dimm Beast Black,131900,Alta
+Memoria_RAM,Kingston,MEMORIA RAM 8GB 3200MHZ DDR4 CL16 DIMM FURY BEAST BLACK,KINGSTON MEMORIA RAM 8GB 3200MHZ DDR4 CL16 DIMM FURY BEAST BLACK,84990,Alta
+Memoria_RAM,Memoria Ram Ddr3 8Gb 1333 1600 1866Mhz Con Dicipador,Memoria Ram Ddr3 8gb 1333 1600 1866mhz Con Dicipador,Memoria Ram Ddr3 8gb 1333 1600 1866mhz Con Dicipador,49990,Alta
+Memoria_RAM,,Memoria RAM 2GB 1 SK hynix HMT325U6CFR8C-H9,Memoria RAM 2GB 1 SK hynix HMT325U6CFR8C-H9,105449,Alta
+Almacenamiento,Toshiba,Disco Duro Externo Toshiba 1TB Canvio Basics A5,Disco Duro Externo Toshiba 1TB Canvio Basics A5,62990,Alta
+Almacenamiento,Toshiba,Disco Duro Externo Toshiba 2TB Canvio Basics A5,Disco Duro Externo Toshiba 2TB Canvio Basics A5,86990,Alta
+Almacenamiento,Kingston,Unidad SSD Kingston NV3 500GB M.2 2230 PCIe 4.0 NVMe,Unidad SSD Kingston NV3 500GB M.2 2230 PCIe 4.0 NVMe,79990,Alta
+Almacenamiento,Hp,Elite Usb-c Docking Station Dock 65w 710412-001 841575-001,Elite Usb-c Docking Station Dock 65w 710412-001 841575-001,61000,Alta
+Almacenamiento,Kingston,TARJETA DE MEMORIA MICRO-SDXC 128 GB CANVAS GO PLUS 200 MB/S A2 U3 V30 CARD,KINGSTON TARJETA DE MEMORIA MICRO-SDXC 128 GB CANVAS GO PLUS 200 MB/S A2 U3 V30 CARD,34990,Alta
+Almacenamiento,Toshiba,externo Toshiba Canvio Basics HDTB440XK3CA 4TB negro,externo Toshiba Canvio Basics HDTB440XK3CA 4TB negro,154990,Alta
+Almacenamiento,Lucky,Pendrive 128gb Metalico Giratorio Con Estuche Metal- Usb 2.0,Pendrive 128gb Metalico Giratorio Con Estuche Metal- Usb 2.0,6800,Alta
+Almacenamiento,Wd,"Unidad SSD 500GB Sata3 2.5"""" SA510 Blue","Unidad SSD 500GB Sata3 2.5"""" SA510 Blue",99990,Alta
+Almacenamiento,Western Digital,SSD INTERNO 240GB GREEN 2.5 SATA 545 MB/S WDS240G3G0A,WESTERN DIGITAL SSD INTERNO 240GB GREEN 2.5 SATA 545 MB/S WDS240G3G0A,54990,Alta
+Almacenamiento,Adata,Unidad De Estado Solido Ssd Adata Su650 256gb Sata Laptop Pc 2.5 Asu650ss-256gt-r,Unidad De Estado Solido Ssd Adata Su650 256gb Sata Laptop Pc 2.5 Asu650ss-256gt-r,62900,Alta
+Almacenamiento,Sandisk,Pendrive Sandisk 32gb Ultra Shift - Usb 3.0 - Flash Drive Color Negro,Pendrive Sandisk 32gb Ultra Shift - Usb 3.0 - Flash Drive Color Negro,6990,Alta
+Almacenamiento,,Disco Duro Laptop 1tb Sata Toshiba 2.5 7mm 5400rpm Color Plateado,Disco Duro Laptop 1tb Sata Toshiba 2.5 7mm 5400rpm Color Plateado,39990,Alta
+Almacenamiento,Kingspec,SSD M.2 NVMe KingSpec XG7000 1TB 2242 PCIe 4.0 7200MB/s Lectura 6600MB/s Escritura,SSD M.2 NVMe KingSpec XG7000 1TB 2242 PCIe 4.0 7200MB/s Lectura 6600MB/s Escritura,148990,Alta
+Almacenamiento,Hoco,Pendrive Dual Usb 3.0 Tipo C Hoco Ud8 32 Gb Gris,Pendrive Dual Usb 3.0 Tipo C Hoco Ud8 32 Gb Gris,9990,Alta
+Almacenamiento,Hoco,Pendrive Dual Usb 3.0 Tipo C Hoco Ud8 64 Gb Gris,Pendrive Dual Usb 3.0 Tipo C Hoco Ud8 64 Gb Gris,13990,Alta
+Fuente_Poder,Corsair,Fuente de poder para PC Corsair Rm750e 750W negra,Fuente de poder para PC Corsair Rm750e 750W negra,135990,Alta
+Fuente_Poder,,Fuente De Poder Mechanic Mt20d3,Fuente De Poder Mechanic Mt20d3,115322,Alta
+Fuente_Poder,Xpg,Fuente De Poder Xpg Pylon 750w 80 Plus Bronze,Fuente De Poder Xpg Pylon 750w 80 Plus Bronze,82990,Alta
+Fuente_Poder,Orange Tech,Cable Poder Trebol Para Cargadores De Notebook Reforzado Color Negro,Cable Poder Trebol Para Cargadores De Notebook Reforzado Color Negro,1989,Alta
+Fuente_Poder,Startech,Cable Micro Usb (blanco) - A A Micro B,Cable Micro Usb (blanco) - A A Micro B,13990,Alta
+Fuente_Poder,Esgaming,FUENTE PODER 650W/80 PLUS BRONZE CERTIFICADA ES-RGB650W ESGAMING,FUENTE PODER 650W/80 PLUS BRONZE CERTIFICADA ES-RGB650W ESGAMING,52590,Alta
+Fuente_Poder,Thermaltake,Fuente de poder para PC Thermaltake Smart SP-750AH3NCB-A 750W negra,Fuente de poder para PC Thermaltake Smart SP-750AH3NCB-A 750W negra,85990,Alta
+Fuente_Poder,Cougar,Fuente De Poder 850w - Cougar Ges 850 80plus Gold Atx Negro,Fuente De Poder 850w - Cougar Ges 850 80plus Gold Atx Negro,99990,Alta
+Fuente_Poder,Be Quiet!,"Fuente De Poder Be Quiet! System Power 11 U, 650w,80+ Bronze Color Negro","Fuente De Poder Be Quiet! System Power 11 U, 650w,80+ Bronze Color Negro",61990,Alta
+Fuente_Poder,Be Quiet!,Fuente De Poder Be Quiet! Pure Power 13 M 850W 80 Plus Gold ATX,Fuente De Poder Be Quiet! Pure Power 13 M 850W 80 Plus Gold ATX,117990,Alta
+Fuente_Poder,Utek,Adaptador Corriente Monitor Hp M22f M24f M27f 19.5v 2.31a ,Adaptador Corriente Monitor Hp M22f M24f M27f 19.5v 2.31a ,19980,Alta
+Fuente_Poder,,Kit Cables De Extensión Cooler Master Conector Universal,Kit Cables De Extensión Cooler Master Conector Universal,40900,Alta
+Fuente_Poder,Genérica,Fuente De Alimentacion Adaptador De Corriente 12v ,Fuente De Alimentacion Adaptador De Corriente 12v ,15500,Alta
+Fuente_Poder,Xtech,Fuente de Poder ATX Xtech 500W CS850XTK09 para PC Conector 12V 4 Pines,Fuente de Poder ATX Xtech 500W CS850XTK09 para PC Conector 12V 4 Pines,14990,Alta
+Fuente_Poder,Antec,Fuente de Poder Modular 650W Antec Neo Eco NE650M 80 Plus Bronze,Fuente de Poder Modular 650W Antec Neo Eco NE650M 80 Plus Bronze,130900,Alta
+Monitor,,Pantalla Doble Extensible Desmontable Portátil 14p 1080p Hd,Pantalla Doble Extensible Desmontable Portátil 14p 1080p Hd,252199,Alta
+Monitor,Hp,Monitor HP M22f FHD,Monitor HP M22f FHD,84990,Alta
+Monitor,Gigabyte,Monitor Gamer Gigabyte Go27q24 27 Qhd Panel Oled 240hz Hdr10 0.03ms Diseño Ergonómico,Monitor Gamer Gigabyte Go27q24 27 Qhd Panel Oled 240hz Hdr10 0.03ms Diseño Ergonómico,469990,Alta
+Monitor,Samsung,"Monitor Gamer Samsung G30D Odyssey G3 27"""" VA FHD 1920*1080 DP HDMI 180HZ 1ms","Monitor Gamer Samsung G30D Odyssey G3 27"""" VA FHD 1920*1080 DP HDMI 180HZ 1ms",113990,Alta
+Monitor,Lg,Monitor LG Ultragear Oled 27gs95qe-b 27'' 240hz Freesync Pro,Monitor LG Ultragear Oled 27gs95qe-b 27'' 240hz Freesync Pro,566900,Alta
+Monitor,Lenovo,"Monitor Lenovo 24"""" L24-4e ","Monitor Lenovo 24"""" L24-4e ",89990,Alta
+Monitor,Arzopa,Monitor Portatil 14 Pulgadas 1080p Hdr Ips 60h A1 Gamut Slim Arzopa,Monitor Portatil 14 Pulgadas 1080p Hdr Ips 60h A1 Gamut Slim Arzopa,77990,Alta
+Monitor,Lg,Monitor LG 27 Led 27ms500 Hdmi Full Hd Ct Color Negro,Monitor LG 27 Led 27ms500 Hdmi Full Hd Ct Color Negro,99900,Alta
+Monitor,Asiaquality,Extensor de pantalla para notebook M4 AsiaQuality 15.6'' un cable dos pantallas Full HD IPS rotación vertical,Extensor de pantalla para notebook M4 AsiaQuality 15.6'' un cable dos pantallas Full HD IPS rotación vertical,194214,Alta
+Monitor,Msi,Monitor Gamer 27  -  Msi Mag 275qf - Wqhd - 0.5ms - 180 Hz,Monitor Gamer 27  -  Msi Mag 275qf - Wqhd - 0.5ms - 180 Hz,175990,Alta
+Monitor,Samsung,Monitor Gamer Odyssey G5 G50F 27'' QHD 180Hz,Monitor Gamer Odyssey G5 G50F 27'' QHD 180Hz,209990,Alta
+Monitor,Lg,"Monitor Gamer 24"""" UltraGear - Full HD, Panel IPS, 180Hz(1ms), FreeSync Premium, HDR10 (24GS60F-B)","Monitor Gamer 24"""" UltraGear - Full HD, Panel IPS, 180Hz(1ms), FreeSync Premium, HDR10 (24GS60F-B)",119990,Alta
+Monitor,Samsung,"Monitor Samsung M5 M50F Smart 32"""" FHD 1920*1080 VA HDMI BT 60Hz 4ms(GTG) Tyzen","Monitor Samsung M5 M50F Smart 32"""" FHD 1920*1080 VA HDMI BT 60Hz 4ms(GTG) Tyzen",196990,Alta
+Monitor,Samsung,"Monitor Comercial Samsung QB75C 75"""" 4K 3840*2160 VA HDMI LAN WIFI BT 8ms","Monitor Comercial Samsung QB75C 75"""" 4K 3840*2160 VA HDMI LAN WIFI BT 8ms",1094990,Alta
+Monitor,Samsung,"Monitor Curvo Samsung S36GD 27"""" FHD 1920*1080 VA VGA HDMI 100Hz  4 GTG","Monitor Curvo Samsung S36GD 27"""" FHD 1920*1080 VA VGA HDMI 100Hz  4 GTG",133990,Alta

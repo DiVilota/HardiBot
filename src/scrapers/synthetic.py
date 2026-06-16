@@ -239,7 +239,7 @@ class SyntheticCatalogGenerator(CatalogScraper):
         filas = []
 
         for categoria, config in DATA.items():
-            console.print(f"[dim]⚙️ Generando {categoria}...[/dim]")
+            console.print(f"[dim]Generando {categoria}...[/dim]")
             todas_opciones = []
             for marca, productos in config["marcas"].items():
                 for modelo, especs, precio in productos:
@@ -264,5 +264,5 @@ class SyntheticCatalogGenerator(CatalogScraper):
         df = pd.DataFrame(filas)
         df = self.validar_dataframe(df)
         df.to_csv(output_path, index=False)
-        console.print(f"[bold yellow]✅ Catálogo sintético generado: {output_path} ({len(df)} productos)[/bold yellow]")
+        console.print(f"[bold yellow]Catalogo sintetico generado: {output_path} ({len(df)} productos)[/bold yellow]")
         return output_path
