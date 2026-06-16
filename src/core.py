@@ -4,6 +4,8 @@ import asyncio
 import json
 import ast
 import operator
+import threading
+from queue import Queue, Empty
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -88,6 +90,76 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     return handler.tool_calls, "\n\n---\n\n".join(textos_ia), metadata
 
 
+def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session"):
+    """Generador sincrono que emite eventos de streaming en tiempo real.
+    Yields dicts: {"type": "token", "content": str} | {"type": "meta", "tool_calls": [], "metadata": {}} | {"type": "error", "content": str}
+    """
+    event_queue: Queue = Queue()
+
+    def _run():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            handler = ToolCaptureHandler()
+            start = time.time()
+
+            async def _stream():
+                try:
+                    async for event in app_state.agent.astream_events(
+                        {"messages": [("user", user_input)]},
+                        config={
+                            "configurable": {"thread_id": session_id},
+                            "callbacks": [handler],
+                        },
+                        version="v2",
+                    ):
+                        kind = event.get("event", "")
+                        if kind == "on_chat_model_stream":
+                            chunk = event.get("data", {}).get("chunk")
+                            if chunk and hasattr(chunk, "content") and chunk.content:
+                                event_queue.put({"type": "token", "content": str(chunk.content)})
+                        elif kind == "on_tool_start":
+                            event_queue.put({
+                                "type": "tool_start",
+                                "name": event.get("name", ""),
+                                "input": str(event.get("data", {}).get("input", ""))[:120],
+                            })
+                        elif kind == "on_tool_end":
+                            event_queue.put({
+                                "type": "tool_end",
+                                "name": event.get("name", ""),
+                            })
+
+                    elapsed = round(time.time() - start, 2)
+                    event_queue.put({
+                        "type": "meta",
+                        "tool_calls": handler.tool_calls,
+                        "metadata": {
+                            "latencia": elapsed,
+                            "herramientas_usadas": len(handler.tool_calls),
+                        },
+                    })
+                except Exception as e:
+                    event_queue.put({"type": "error", "content": str(e)})
+
+            loop.run_until_complete(_stream())
+        finally:
+            loop.close()
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+
+    while True:
+        try:
+            event = event_queue.get(timeout=90)
+            yield event
+            if event["type"] in ("meta", "error"):
+                break
+        except Empty:
+            yield {"type": "error", "content": "Timeout"}
+            break
+
+
 class CarritoCompras:
     def __init__(self):
         self.items = []
@@ -115,6 +187,50 @@ class CarritoCompras:
 
     def limpiar(self):
         self.items = []
+
+    def total(self) -> float:
+        return sum(item["subtotal"] for item in self.items)
+
+    def generar_pdf(self, output_path: str = None) -> bytes:
+        from fpdf import FPDF
+
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, "Cotizacion - HardiBot", new_x="LMARGIN", new_y="NEXT", align="C")
+        pdf.set_font("Helvetica", "", 10)
+        pdf.cell(0, 6, f"Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}", new_x="LMARGIN", new_y="NEXT", align="C")
+        pdf.ln(8)
+
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.cell(80, 8, "Producto", border=1)
+        pdf.cell(25, 8, "Cantidad", border=1, align="C")
+        pdf.cell(40, 8, "P. Unitario", border=1, align="R")
+        pdf.cell(40, 8, "Subtotal", border=1, align="R")
+        pdf.ln()
+
+        pdf.set_font("Helvetica", "", 9)
+        for item in self.items:
+            precio = f"{item['precio_unitario']:,.0f}".replace(",", ".")
+            subtotal = f"{item['subtotal']:,.0f}".replace(",", ".")
+            pdf.cell(80, 7, item["producto"][:40], border=1)
+            pdf.cell(25, 7, str(item["cantidad"]), border=1, align="C")
+            pdf.cell(40, 7, f"${precio}", border=1, align="R")
+            pdf.cell(40, 7, f"${subtotal}", border=1, align="R")
+            pdf.ln()
+
+        pdf.set_font("Helvetica", "B", 10)
+        total = self.total()
+        total_str = f"{total:,.0f}".replace(",", ".")
+        pdf.cell(145, 8, "TOTAL", border=1, align="R")
+        pdf.cell(40, 8, f"${total_str} CLP", border=1, align="R")
+
+        if output_path:
+            pdf.output(output_path)
+            return output_path
+        return pdf.output()
 
 
 class HerramientaRobusta:

@@ -1,8 +1,9 @@
 import time
 import streamlit as st
-from src.core import ejecutar_con_visibilidad, reconfigurar_agente
+from src.core import ejecutar_con_streaming, reconfigurar_agente, app_state
 from src.personas import PERSONAS
 from src.observability import get_dashboard_metrics, estimar_ahorro_tokens
+from src.sesiones import guardar_sesion, cargar_sesion, listar_sesiones, eliminar_sesion
 
 st.set_page_config(page_title="HardiBot", layout="centered")
 
@@ -15,6 +16,7 @@ PERSONA_IDS = list(PERSONAS.keys())
 if "persona_id" not in st.session_state:
     st.session_state.persona_id = "hardware"
     st.session_state.tool_history = []
+    st.session_state.session_id = f"sesion_{int(time.time())}"
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": f"¡Hola! Soy {persona_actual['nombre']}. {persona_actual['descripcion']}"}
@@ -39,8 +41,49 @@ with st.sidebar:
 
     st.divider()
     st.caption(f"Persona activa: **{persona_actual['nombre']}**")
-    st.caption(f"Catálogo: `{persona_actual['catalogo']}`")
-    st.caption(f"Productos: {persona_actual.get('total_productos', 'N/A')}")
+    st.caption(f"Catalogo: `{persona_actual['catalogo']}`")
+
+    # ── Cotizacion PDF ──
+    st.divider()
+    st.caption("**Cotizacion**")
+    carrito = app_state.carrito
+    if carrito.items:
+        total = carrito.total()
+        st.caption(f"Items: {len(carrito.items)} | Total: ${total:,.0f}".replace(",", "."))
+        pdf_bytes = carrito.generar_pdf()
+        st.download_button(
+            label="Descargar cotizacion PDF",
+            data=pdf_bytes,
+            file_name="cotizacion_hardibot.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+    else:
+        st.caption("Carrito vacio")
+
+    # ── Sesiones ──
+    st.divider()
+    with st.expander("Sesiones guardadas", expanded=False):
+        sesiones = listar_sesiones()
+        if sesiones:
+            for s in sesiones:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    if st.button(f"{s['persona_id']} — {s['mensajes']} msg", key=f"load_{s['session_id']}", use_container_width=True):
+                        data = cargar_sesion(s['session_id'])
+                        if data:
+                            st.session_state.session_id = s['session_id']
+                            st.session_state.persona_id = data.get('persona_id', 'hardware')
+                            st.session_state.messages = data.get('messages', [])
+                            st.session_state.tool_history = data.get('tool_history', [])
+                            reconfigurar_agente(st.session_state.persona_id)
+                            st.rerun()
+                with col2:
+                    if st.button("X", key=f"del_{s['session_id']}"):
+                        eliminar_sesion(s['session_id'])
+                        st.rerun()
+        else:
+            st.caption("Sin sesiones guardadas")
 
     # ── Dashboard LangSmith ──
     st.divider()
@@ -113,54 +156,64 @@ if prompt := st.chat_input("Escribe tu consulta aquí..."):
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            # ── Fase 1: Ejecución con visibilidad de herramientas ──
-            status = st.status("🔍 Analizando tu consulta...", expanded=True)
-            tool_calls, response, metadata = ejecutar_con_visibilidad(prompt)
+            status = st.status("Analizando tu consulta...", expanded=True)
+            response_placeholder = st.empty()
 
-            # Mostrar herramientas usadas
-            if tool_calls:
-                for tc in tool_calls:
-                    icon = "✅" if tc["status"] == "complete" else "⏳"
-                    label = f"**{tc['name']}**"
-                    if tc["duration"]:
-                        label += f" — ⏱ {tc['duration']}s"
-                    status.markdown(f"{icon} {label}")
-                    if tc["input"]:
-                        status.code(tc["input"][:120], language="text")
+            displayed = ""
+            tool_calls = []
+            metadata = {}
+
+            for event in ejecutar_con_streaming(prompt):
+                if event["type"] == "token":
+                    displayed += event["content"]
+                    response_placeholder.markdown(displayed + "▌")
+                elif event["type"] == "tool_start":
+                    status.markdown(f"🔄 **{event['name']}**")
+                elif event["type"] == "tool_end":
+                    duration = event.get("duration", "")
+                    label = f"✅ **{event['name']}**"
+                    if duration:
+                        label += f" — {duration}s"
+                    status.markdown(label)
+                    if event.get("input"):
+                        status.code(str(event["input"])[:120], language="text")
+                elif event["type"] == "meta":
+                    tool_calls = event["tool_calls"]
+                    metadata = event["metadata"]
 
             status.update(
-                label=f"✅ Análisis completado — {len(tool_calls)} herramienta(s) · {metadata['latencia']}s",
+                label=f"Completado — {len(tool_calls)} herramienta(s) · {metadata.get('latencia', '?')}s",
                 state="complete",
             )
             status.expanded = False
 
-            # ── Fase 2: Streaming de la respuesta ──
-            response_placeholder = st.empty()
-            displayed = ""
-            for palabra in response.split(" "):
-                displayed += palabra + " "
-                response_placeholder.markdown(displayed + "▌")
-                time.sleep(0.015)
             response_placeholder.markdown(displayed)
 
-            # ── Fase 3: Dashboard de transparencia de la ejecución ──
-            with st.expander("🕵️ Árbol de decisión del agente", expanded=False):
-                st.caption(f"⏱ Latencia total: **{metadata['latencia']}s**")
-                for i, tc in enumerate(tool_calls, 1):
-                    st.markdown(f"**Paso {i}: `{tc['name']}`**")
-                    col_in, col_out = st.columns([1, 1])
-                    with col_in:
-                        st.text_area("Input", tc["input"], height=60, key=f"in_{i}_{int(time.time())}", label_visibility="collapsed")
-                    with col_out:
-                        st.text_area("Output", tc["output"][:200], height=60, key=f"out_{i}_{int(time.time())}", label_visibility="collapsed")
-                    if tc["duration"]:
-                        st.caption(f"⏱ Duración: {tc['duration']}s")
+            with st.expander("Arbol de decision del agente", expanded=False):
+                st.caption(f"⏱ Latencia total: **{metadata.get('latencia', '?')}s**")
+                if tool_calls:
+                    for i, tc in enumerate(tool_calls, 1):
+                        st.markdown(f"**Paso {i}: `{tc.get('name', '?')}`**")
+                        col_in, col_out = st.columns([1, 1])
+                        with col_in:
+                            st.text_area("Input", tc.get("input", ""), height=60, key=f"in_{i}_{int(time.time())}", label_visibility="collapsed")
+                        with col_out:
+                            st.text_area("Output", str(tc.get("output", ""))[:200], height=60, key=f"out_{i}_{int(time.time())}", label_visibility="collapsed")
+                        if tc.get("duration"):
+                            st.caption(f"⏱ Duracion: {tc['duration']}s")
 
-            # Guardar en el historial de herramientas de la sesión
             st.session_state.tool_history.append({
                 "query": prompt,
                 "tools": tool_calls,
-                "latencia": metadata["latencia"],
+                "latencia": metadata.get("latencia", 0),
             })
 
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"role": "assistant", "content": displayed})
+
+        guardar_sesion(
+            session_id=st.session_state.get("session_id", "default"),
+            persona_id=st.session_state.persona_id,
+            messages=st.session_state.messages,
+            tool_history=st.session_state.tool_history,
+            carrito_items=app_state.carrito.items,
+        )
