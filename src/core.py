@@ -23,8 +23,23 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
+from src.observability import (
+    LoggerEstructurado,
+    RecolectorMetricas,
+    SistemaAlertas,
+    observable,
+)
+
 load_dotenv(override=True)
 console = Console()
+
+logger_obs = LoggerEstructurado(
+    nombre="hardibot",
+    log_dir=os.getenv("OBSERVABILITY_LOG_DIR", "logs"),
+    nivel=os.getenv("OBSERVABILITY_LOG_LEVEL", "DEBUG"),
+)
+recolector_obs = RecolectorMetricas()
+sistema_alertas = SistemaAlertas()
 
 MODELO_POR_DEFECTO = os.getenv("MODEL_NAME", "gpt-4o")
 
@@ -63,6 +78,9 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     """Ejecuta el agente y retorna (tool_calls, response_text, metadata)."""
     start = time.time()
     handler = ToolCaptureHandler()
+    trace_id = f"vis-{int(time.time())}"
+
+    logger_obs.info("ejecutar_con_visibilidad", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
 
     respuesta = app_state.agent.invoke(
         {"messages": [("user", user_input)]},
@@ -87,6 +105,26 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
         "herramientas_usadas": len(handler.tool_calls),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+    recolector_obs.registrar_exito(
+        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+        tiempo_respuesta_ms=elapsed * 1000,
+        tokens_prompt=len(user_input),
+        tokens_completion=sum(len(t) for t in textos_ia),
+        trace_id=trace_id,
+    )
+
+    alertas = sistema_alertas.evaluar(recolector_obs)
+    for alerta in alertas:
+        logger_obs.warning("alerta_disparada", metadata={
+            "regla": alerta.regla,
+            "severidad": alerta.severidad,
+            "valor": alerta.valor_actual,
+            "umbral": alerta.umbral,
+            "mensaje": alerta.mensaje,
+        }, trace_id=trace_id)
+
+    logger_obs.info("ejecutar_con_visibilidad_completado", metadata=metadata, trace_id=trace_id)
     return handler.tool_calls, "\n\n---\n\n".join(textos_ia), metadata
 
 
@@ -94,6 +132,8 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
     """Generador sincrono que emite eventos de streaming en tiempo real.
     Yields dicts: {"type": "token", "content": str} | {"type": "meta", "tool_calls": [], "metadata": {}} | {"type": "error", "content": str}
     """
+    trace_id = f"stream-{int(time.time())}"
+    logger_obs.info("ejecutar_con_streaming_inicio", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
     event_queue: Queue = Queue()
 
     def _run():
@@ -131,6 +171,14 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
                             })
 
                     elapsed = round(time.time() - start, 2)
+                    logger_obs.info("ejecutar_con_streaming_completado", metadata={"latencia": elapsed, "herramientas_usadas": len(handler.tool_calls)}, trace_id=trace_id)
+                    recolector_obs.registrar_exito(
+                        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+                        tiempo_respuesta_ms=elapsed * 1000,
+                        tokens_prompt=len(user_input),
+                        tokens_completion=0,
+                        trace_id=trace_id,
+                    )
                     event_queue.put({
                         "type": "meta",
                         "tool_calls": handler.tool_calls,
@@ -140,6 +188,7 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
                         },
                     })
                 except Exception as e:
+                    logger_obs.error("ejecutar_con_streaming_error", metadata={"error": str(e)}, trace_id=trace_id)
                     event_queue.put({"type": "error", "content": str(e)})
 
             loop.run_until_complete(_stream())
@@ -158,6 +207,15 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
         except Empty:
             yield {"type": "error", "content": "Timeout"}
             break
+
+    alertas = sistema_alertas.evaluar(recolector_obs)
+    for alerta in alertas:
+        logger_obs.warning("alerta_disparada", metadata={
+            "regla": alerta.regla,
+            "severidad": alerta.severidad,
+            "valor": alerta.valor_actual,
+            "umbral": alerta.umbral,
+        }, trace_id=trace_id)
 
 
 class CarritoCompras:
@@ -288,6 +346,15 @@ def operacion_segura(operacion: str):
 _TOOLS = []
 
 
+@observable
+def _nodo_ejecutar_herramienta(state):
+    resultado = app_state.agent.invoke(
+        state,
+        config={"configurable": {"thread_id": state.get("session_id", "default")}},
+    )
+    return resultado
+
+
 class HardiBotAppState:
     """Estado mutable de la aplicacion. Se puede reconfigurar en caliente."""
 
@@ -349,8 +416,11 @@ def _buscar_catalogo_local(query: str) -> str:
     """Busca en el INVENTARIO LOCAL de HardiBot (catalogo FAISS interno).
     NO busca en internet, Knasta, SoloTodo ni tiendas externas.
     Usa esta herramienta para consultar productos disponibles en nuestro propio stock interno."""
+    logger_obs.info("tool_buscar_catalogo_local", metadata={"query": query[:100]})
     env = HerramientaRobusta("RAG_Catalogo", app_state.motor_rag.recuperar_contexto)
-    return env.ejecutar(query=query, top_k=15)
+    resultado = env.ejecutar(query=query, top_k=15)
+    logger_obs.info("tool_buscar_catalogo_local_completado", metadata={"query": query[:100], "resultado_len": len(resultado)})
+    return resultado
 
 
 @tool
@@ -364,6 +434,7 @@ def _buscar_web(query: str) -> str:
     - Necesites validar si tu cotizacion es competitiva.
     - El producto no este en tu catalogo y quieras investigar.
     """
+    logger_obs.info("tool_buscar_web", metadata={"query": query[:100]})
     api_key = os.getenv("TAVILY_API_KEY")
     if api_key:
         try:
@@ -397,13 +468,17 @@ def _buscar_web(query: str) -> str:
 @tool
 def _calcular_presupuesto(operacion: str) -> str:
     """Usa esta herramienta para sumar o multiplicar los precios de los componentes. Ingresa SOLO la operacion matematica."""
+    logger_obs.info("tool_calcular_presupuesto", metadata={"operacion": operacion[:100]})
     env = HerramientaRobusta("Calculadora", operacion_segura, max_reintentos=2)
-    return env.ejecutar(operacion=operacion)
+    resultado = env.ejecutar(operacion=operacion)
+    logger_obs.info("tool_calcular_presupuesto_completado", metadata={"operacion": operacion[:100], "resultado": resultado[:200]})
+    return resultado
 
 
 @tool
 def _buscar_foto_componente(query: str) -> str:
     """Busca la URL de una imagen de un producto (DDGS)."""
+    logger_obs.info("tool_buscar_foto_componente", metadata={"query": query[:100]})
     try:
         from duckduckgo_search import DDGS
         resultados = DDGS().images(query, max_results=1)
@@ -411,19 +486,26 @@ def _buscar_foto_componente(query: str) -> str:
             return resultados[0]["image"]
         return "No se encontro imagen."
     except Exception as e:
+        logger_obs.error("tool_buscar_foto_componente_error", metadata={"error": str(e)})
         return f"Error al buscar imagen: {e}"
 
 
 @tool
 def _agregar_al_carrito(producto: str, cantidad: int, precio_unitario: float) -> str:
     """Agrega un producto al carrito de compras del usuario."""
-    return app_state.carrito.agregar(producto, cantidad, precio_unitario)
+    logger_obs.info("tool_agregar_al_carrito", metadata={"producto": producto[:50], "cantidad": cantidad, "precio_unitario": precio_unitario})
+    resultado = app_state.carrito.agregar(producto, cantidad, precio_unitario)
+    logger_obs.info("tool_agregar_al_carrito_completado", metadata={"producto": producto[:50], "resultado": resultado[:200]})
+    return resultado
 
 
 @tool
 def _ver_carrito() -> str:
     """Muestra los productos actuales en el carrito de compras y el precio total."""
-    return app_state.carrito.ver()
+    logger_obs.info("tool_ver_carrito")
+    resultado = app_state.carrito.ver()
+    logger_obs.info("tool_ver_carrito_completado", metadata={"resultado": resultado[:200]})
+    return resultado
 
 
 _TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
@@ -440,6 +522,8 @@ def reconfigurar_agente(persona_id: str) -> dict:
 async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
     console.print(Rule(title=f"HardiBot ({app_state.persona_id})", style="bold blue", align="left"))
     start_time = time.time()
+    trace_id = f"chat-{int(time.time())}"
+    logger_obs.info("chat_hardibot_inicio", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
     try:
         with Live(Markdown("Analizando y ejecutando herramientas..."), console=console, refresh_per_second=15) as live:
             respuesta = app_state.agent.invoke(
@@ -449,7 +533,27 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
             live.update(Markdown(respuesta["messages"][-1].content))
     except Exception as e:
         console.print(f"\n[bold red]Error:[/bold red] {e}")
+        logger_obs.error("chat_hardibot_error", metadata={"error": str(e)}, trace_id=trace_id)
     total_time = time.time() - start_time
+    logger_obs.info("chat_hardibot_completado", metadata={"duracion_s": round(total_time, 2)}, trace_id=trace_id)
+
+    recolector_obs.registrar_exito(
+        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+        tiempo_respuesta_ms=total_time * 1000,
+        tokens_prompt=len(user_input),
+        tokens_completion=0,
+        trace_id=trace_id,
+    )
+
+    alertas = sistema_alertas.evaluar(recolector_obs)
+    for alerta in alertas:
+        logger_obs.warning("alerta_disparada", metadata={
+            "regla": alerta.regla,
+            "severidad": alerta.severidad,
+            "valor": alerta.valor_actual,
+            "umbral": alerta.umbral,
+        }, trace_id=trace_id)
+
     console.print(Rule(style="dim"))
     console.print(f"[dim]Inferencia completada en {total_time:.2f}s[/dim]")
 
