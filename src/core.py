@@ -32,6 +32,15 @@ from src.observability import (
     _sistema_trazas,
 )
 from src.security import AgenteSeguro
+from src.scalability.cache_llm import CacheLLM
+from src.scalability.cache_semantico import CacheSemantico
+from src.scalability.model_router import seleccionar_modelo
+from src.scalability.token_estimator import estimar_tokens
+from src.scalability.batch_processor import ProcesadorLotes, Solicitud, PRIORIDAD_NORMAL
+from src.scalability.cost_calculator import CalculadorCostos
+from src.scalability.resilience import RetryConBackoff, CadenaFallback
+from src.scalability.sustainability_report import ReporteSostenibilidad
+from src.scalability.system_optimizer import SistemaOptimizado
 
 load_dotenv(override=True)
 console = Console()
@@ -43,6 +52,13 @@ logger_obs = LoggerEstructurado(
 )
 recolector_obs = RecolectorMetricas()
 sistema_alertas = SistemaAlertas()
+
+cache_llm = CacheLLM(max_size=100)
+cache_semantico = CacheSemantico(umbral=0.85, ttl=3600)
+procesador_lotes = ProcesadorLotes(tamano_lote=5)
+calculador_costos = CalculadorCostos(presupuesto_diario=100.0)
+reporte_sostenibilidad = ReporteSostenibilidad()
+sistema_optimizado = SistemaOptimizado()
 
 MODELO_POR_DEFECTO = os.getenv("MODEL_NAME", "gpt-4o")
 
@@ -90,6 +106,24 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
         logger_obs.warning("seguridad_bloqueo", metadata={"razones": [e.detalle for e in resultado_seguridad.eventos]}, trace_id=trace_id)
         return [], resultado_seguridad.error_multi_idioma, {"bloqueado": True, "eventos": [{"tipo": e.tipo, "detalle": e.detalle} for e in resultado_seguridad.eventos]}
 
+    cached = cache_llm.obtener(user_input, os.getenv("MODEL_NAME", "gpt-4o"))
+    if cached:
+        elapsed = round(time.time() - start, 2)
+        logger_obs.info("cache_hit", metadata={"latencia": elapsed}, trace_id=trace_id)
+        recolector_obs.registrar_exito(
+            modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+            tiempo_respuesta_ms=elapsed * 1000,
+            tokens_prompt=0,
+            tokens_completion=len(cached),
+            trace_id=trace_id,
+        )
+        metadata = {"latencia": elapsed, "cache_hit": True, "timestamp": datetime.now(timezone.utc).isoformat()}
+        logger_obs.info("ejecutar_con_visibilidad_completado", metadata=metadata, trace_id=trace_id)
+        return handler.tool_calls, cached, metadata
+
+    modelo_config = seleccionar_modelo(user_input)
+    tokens_in = estimar_tokens(user_input)
+
     respuesta = app_state.agent.invoke(
         {"messages": [("user", user_input)]},
         config={
@@ -110,18 +144,26 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
         if msg.type == "ai" and msg.content:
             textos_ia.insert(0, msg.content)
 
+    texto_final = "\n\n---\n\n".join(textos_ia)
+    tokens_out = estimar_tokens(texto_final)
+
+    cache_llm.guardar(user_input, modelo_config.nombre, texto_final)
+    calculador_costos.registrar(modelo_config.nombre, tokens_in, tokens_out)
+    reporte_sostenibilidad.agregar_registro(modelo_config.nombre, tokens_in, tokens_out, elapsed, "exito")
+
     metadata = {
         "latencia": elapsed,
         "total_mensajes": len(mensajes),
         "herramientas_usadas": len(handler.tool_calls),
+        "modelo": modelo_config.nombre,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     recolector_obs.registrar_exito(
-        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+        modelo=modelo_config.nombre,
         tiempo_respuesta_ms=elapsed * 1000,
-        tokens_prompt=len(user_input),
-        tokens_completion=sum(len(t) for t in textos_ia),
+        tokens_prompt=tokens_in,
+        tokens_completion=tokens_out,
         trace_id=trace_id,
     )
 
@@ -135,8 +177,13 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
             "mensaje": alerta.mensaje,
         }, trace_id=trace_id)
 
+    costo_alertas = calculador_costos.evaluar_alertas(calculador_costos.total_gastado())
+    for alerta in costo_alertas:
+        logger_obs.warning("costo_alerta", metadata={"nivel": alerta["nivel"], "mensaje": alerta["mensaje"]}, trace_id=trace_id)
+
+    reporte_sostenibilidad.guardar()
     logger_obs.info("ejecutar_con_visibilidad_completado", metadata=metadata, trace_id=trace_id)
-    return handler.tool_calls, "\n\n---\n\n".join(textos_ia), metadata
+    return handler.tool_calls, texto_final, metadata
 
 
 def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session"):
@@ -151,6 +198,15 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
         logger_obs.warning("seguridad_bloqueo_stream", metadata={"razones": [e.detalle for e in resultado_seguridad.eventos]}, trace_id=trace_id)
         yield {"type": "meta", "tool_calls": [], "metadata": {"bloqueado": True, "error": resultado_seguridad.error_multi_idioma}}
         return
+
+    cached = cache_llm.obtener(user_input, os.getenv("MODEL_NAME", "gpt-4o"))
+    if cached:
+        reporte_sostenibilidad.agregar_metricas_cache(hits=1, tokens_ahorrados=estimar_tokens(cached))
+        yield {"type": "meta", "tool_calls": [], "metadata": {"cache_hit": True, "texto": cached, "latencia": 0.0}}
+        return
+
+    modelo_config = seleccionar_modelo(user_input)
+    tokens_in = estimar_tokens(user_input)
 
     event_queue: Queue = Queue()
 
@@ -191,11 +247,14 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
                     elapsed = round(time.time() - start, 2)
                     _sistema_trazas.finalizar_traza()
                     _sistema_trazas.guardar()
-                    logger_obs.info("ejecutar_con_streaming_completado", metadata={"latencia": elapsed, "herramientas_usadas": len(handler.tool_calls)}, trace_id=trace_id)
+
+                    calculador_costos.registrar(modelo_config.nombre, tokens_in, 0)
+                    reporte_sostenibilidad.agregar_registro(modelo_config.nombre, tokens_in, 0, elapsed, "exito")
+                    logger_obs.info("ejecutar_con_streaming_completado", metadata={"latencia": elapsed, "herramientas_usadas": len(handler.tool_calls), "modelo": modelo_config.nombre}, trace_id=trace_id)
                     recolector_obs.registrar_exito(
-                        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+                        modelo=modelo_config.nombre,
                         tiempo_respuesta_ms=elapsed * 1000,
-                        tokens_prompt=len(user_input),
+                        tokens_prompt=tokens_in,
                         tokens_completion=0,
                         trace_id=trace_id,
                     )
@@ -205,10 +264,12 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
                         "metadata": {
                             "latencia": elapsed,
                             "herramientas_usadas": len(handler.tool_calls),
+                            "modelo": modelo_config.nombre,
                         },
                     })
                 except Exception as e:
                     logger_obs.error("ejecutar_con_streaming_error", metadata={"error": str(e)}, trace_id=trace_id)
+                    reporte_sostenibilidad.agregar_registro(modelo_config.nombre, tokens_in, 0, 0, "error")
                     event_queue.put({"type": "error", "content": str(e)})
 
             loop.run_until_complete(_stream())
@@ -236,6 +297,7 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
             "valor": alerta.valor_actual,
             "umbral": alerta.umbral,
         }, trace_id=trace_id)
+    reporte_sostenibilidad.guardar()
 
 
 class CarritoCompras:
@@ -312,24 +374,22 @@ class CarritoCompras:
 
 
 class HerramientaRobusta:
+    """Wrapper resiliente con retry via RetryConBackoff (centralizado en resilience).
+    Mantiene compatibilidad hacia atras mientras unifica la logica de reintentos."""
+
     def __init__(self, nombre: str, funcion, max_reintentos: int = 3):
         self.nombre = nombre
         self.funcion = funcion
         self.max_reintentos = max_reintentos
+        self._retry = RetryConBackoff(max_reintentos=max_reintentos, base=0.5, factor=2.0, jitter=True)
 
     def ejecutar(self, **kwargs) -> str:
-        ultimo_error = None
-        for intento in range(1, self.max_reintentos + 1):
-            try:
-                resultado = self.funcion(**kwargs)
-                return str(resultado)
-            except Exception as e:
-                ultimo_error = e
-                console.print(f"[dim yellow]Intento {intento} fallido en {self.nombre}: {e}[/dim yellow]")
-                time.sleep(0.5 * (2 ** (intento - 1)))
+        resultado = self._retry.ejecutar(self.funcion, **kwargs)
+        if resultado is not None:
+            return str(resultado)
         return json.dumps({
             "error": f"La herramienta '{self.nombre}' fallo tras {self.max_reintentos} intentos.",
-            "detalle": str(ultimo_error),
+            "detalle": "Todos los reintentos fallaron.",
             "sugerencia": "Informa al usuario que hubo un problema tecnico al ejecutar esta accion.",
         })
 
@@ -635,6 +695,19 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
         console.print(f"\n[bold red]Seguridad:[/bold red] {resultado_seguridad.error_multi_idioma}")
         return
 
+    cached = cache_llm.obtener(user_input, os.getenv("MODEL_NAME", "gpt-4o"))
+    if cached:
+        total_time = time.time() - start_time
+        logger_obs.info("cache_hit_chat", metadata={"latencia": round(total_time, 2)}, trace_id=trace_id)
+        console.print(Markdown(cached))
+        console.print(Rule(style="dim"))
+        console.print(f"[dim]Cache hit en {total_time:.2f}s[/dim]")
+        reporte_sostenibilidad.agregar_metricas_cache(hits=1, tokens_ahorrados=estimar_tokens(cached))
+        return
+
+    modelo_config = seleccionar_modelo(user_input)
+    tokens_in = estimar_tokens(user_input)
+
     try:
         with Live(Markdown("Analizando y ejecutando herramientas..."), console=console, refresh_per_second=15) as live:
             respuesta = app_state.agent.invoke(
@@ -648,13 +721,18 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
         console.print(f"\n[bold red]Error:[/bold red] {e}")
         logger_obs.error("chat_hardibot_error", metadata={"error": str(e)}, trace_id=trace_id)
     total_time = time.time() - start_time
+    tokens_out = estimar_tokens(str(respuesta["messages"][-1].content)) if "messages" in locals() and respuesta["messages"] else 0
     logger_obs.info("chat_hardibot_completado", metadata={"duracion_s": round(total_time, 2)}, trace_id=trace_id)
 
+    cache_llm.guardar(user_input, modelo_config.nombre, str(respuesta["messages"][-1].content) if "messages" in locals() and respuesta["messages"] else "")
+    calculador_costos.registrar(modelo_config.nombre, tokens_in, tokens_out)
+    reporte_sostenibilidad.agregar_registro(modelo_config.nombre, tokens_in, tokens_out, total_time, "exito" if "messages" in locals() else "error")
+
     recolector_obs.registrar_exito(
-        modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+        modelo=modelo_config.nombre,
         tiempo_respuesta_ms=total_time * 1000,
-        tokens_prompt=len(user_input),
-        tokens_completion=0,
+        tokens_prompt=tokens_in,
+        tokens_completion=tokens_out,
         trace_id=trace_id,
     )
 
@@ -667,8 +745,13 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
             "umbral": alerta.umbral,
         }, trace_id=trace_id)
 
+    costo_alertas = calculador_costos.evaluar_alertas(calculador_costos.total_gastado())
+    for alerta in costo_alertas:
+        logger_obs.warning("costo_alerta", metadata={"nivel": alerta["nivel"], "mensaje": alerta["mensaje"]}, trace_id=trace_id)
+
+    reporte_sostenibilidad.guardar()
     console.print(Rule(style="dim"))
-    console.print(f"[dim]Inferencia completada en {total_time:.2f}s[/dim]")
+    console.print(f"[dim]Inferencia completada en {total_time:.2f}s | Modelo: {modelo_config.nombre}[/dim]")
 
 
 def iniciar_loop():
