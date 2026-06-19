@@ -28,6 +28,7 @@ from src.observability import (
     RecolectorMetricas,
     SistemaAlertas,
     observable,
+    _sistema_trazas,
 )
 
 load_dotenv(override=True)
@@ -89,6 +90,9 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
             "callbacks": [handler],
         },
     )
+
+    _sistema_trazas.finalizar_traza()
+    _sistema_trazas.guardar()
 
     elapsed = round(time.time() - start, 2)
     mensajes = respuesta["messages"]
@@ -171,6 +175,8 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
                             })
 
                     elapsed = round(time.time() - start, 2)
+                    _sistema_trazas.finalizar_traza()
+                    _sistema_trazas.guardar()
                     logger_obs.info("ejecutar_con_streaming_completado", metadata={"latencia": elapsed, "herramientas_usadas": len(handler.tool_calls)}, trace_id=trace_id)
                     recolector_obs.registrar_exito(
                         modelo=os.getenv("MODEL_NAME", "gpt-4o"),
@@ -531,6 +537,8 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
                 config={"configurable": {"thread_id": session_id}},
             )
             live.update(Markdown(respuesta["messages"][-1].content))
+        _sistema_trazas.finalizar_traza()
+        _sistema_trazas.guardar()
     except Exception as e:
         console.print(f"\n[bold red]Error:[/bold red] {e}")
         logger_obs.error("chat_hardibot_error", metadata={"error": str(e)}, trace_id=trace_id)

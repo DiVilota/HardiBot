@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from src.observability.logger import LoggerEstructurado
 from src.observability.metrics import RecolectorMetricas
+from src.observability.tracing import SistemaTrazas, EXITOSO, ERROR
 
 
 class _LoggerGlobal:
@@ -20,6 +21,7 @@ class _LoggerGlobal:
 
 
 _logger_global = _LoggerGlobal()
+_sistema_trazas = SistemaTrazas()
 
 
 def observable(nodo_func):
@@ -27,7 +29,17 @@ def observable(nodo_func):
     def wrapper(state, **kwargs):
         _recolector = kwargs.pop("_recolector_metrica", None)
         trace_id = state.get("trace_id", str(uuid.uuid4().hex[:8]))
+        span_id = state.get("span_id")
         nodo_nombre = nodo_func.__name__
+
+        if _sistema_trazas._traza_activa is None:
+            _sistema_trazas.iniciar_traza(nombre=nodo_nombre, trace_id=trace_id)
+
+        span = _sistema_trazas.iniciar_span(
+            nombre=nodo_nombre,
+            parent_span_id=span_id,
+        )
+
         _logger_global.logger.info(
             "nodo_iniciado",
             metadata={"nodo": nodo_nombre, "trace_id": trace_id},
@@ -38,6 +50,7 @@ def observable(nodo_func):
             resultado = nodo_func(state, **kwargs)
             duracion_ms = (time.perf_counter() - inicio) * 1000
             resultado["trace_id"] = trace_id
+            _sistema_trazas.finalizar_span(span, estado=EXITOSO)
             _logger_global.logger.info(
                 "nodo_finalizado",
                 metadata={
@@ -59,6 +72,7 @@ def observable(nodo_func):
             return resultado
         except Exception as e:
             duracion_ms = (time.perf_counter() - inicio) * 1000
+            _sistema_trazas.finalizar_span(span, estado=ERROR, error=str(e))
             _logger_global.logger.error(
                 "nodo_finalizado",
                 metadata={
