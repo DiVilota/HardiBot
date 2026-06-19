@@ -10,6 +10,7 @@ AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 TOOL_MESSAGES = {
     "_buscar_catalogo_local": "📦 Revisando el inventario local...",
     "_buscar_web": "🌐 Buscando en tiendas online...",
+    "_buscar_knasta": "🔍 Buscando en Knasta.cl...",
     "_calcular_presupuesto": "🧮 Calculando totales y descuentos...",
     "_buscar_foto_componente": "🖼️ Buscando imagen del producto...",
     "_agregar_al_carrito": "🛒 Agregando al carrito...",

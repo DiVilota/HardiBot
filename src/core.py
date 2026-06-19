@@ -5,6 +5,7 @@ import json
 import ast
 import operator
 import threading
+import warnings
 from queue import Queue, Empty
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -30,6 +31,7 @@ from src.observability import (
     observable,
     _sistema_trazas,
 )
+from src.security import AgenteSeguro
 
 load_dotenv(override=True)
 console = Console()
@@ -82,6 +84,11 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     trace_id = f"vis-{int(time.time())}"
 
     logger_obs.info("ejecutar_con_visibilidad", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
+
+    resultado_seguridad = app_state.agente_seguro.procesar(user_input)
+    if not resultado_seguridad.es_seguro:
+        logger_obs.warning("seguridad_bloqueo", metadata={"razones": [e.detalle for e in resultado_seguridad.eventos]}, trace_id=trace_id)
+        return [], resultado_seguridad.error_multi_idioma, {"bloqueado": True, "eventos": [{"tipo": e.tipo, "detalle": e.detalle} for e in resultado_seguridad.eventos]}
 
     respuesta = app_state.agent.invoke(
         {"messages": [("user", user_input)]},
@@ -138,6 +145,13 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
     """
     trace_id = f"stream-{int(time.time())}"
     logger_obs.info("ejecutar_con_streaming_inicio", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
+
+    resultado_seguridad = app_state.agente_seguro.procesar(user_input)
+    if not resultado_seguridad.es_seguro:
+        logger_obs.warning("seguridad_bloqueo_stream", metadata={"razones": [e.detalle for e in resultado_seguridad.eventos]}, trace_id=trace_id)
+        yield {"type": "meta", "tool_calls": [], "metadata": {"bloqueado": True, "error": resultado_seguridad.error_multi_idioma}}
+        return
+
     event_queue: Queue = Queue()
 
     def _run():
@@ -381,6 +395,10 @@ class HardiBotAppState:
         self.carrito = CarritoCompras()
         self.memoria = MemorySaver()
         self.agent = None
+        self.agente_seguro = AgenteSeguro(
+            api_key=os.getenv("GITHUB_TOKEN", ""),
+            modelo=os.getenv("MODEL_NAME", "gpt-4o"),
+        )
 
     def iniciar(self):
         self.agent = create_react_agent(
@@ -458,7 +476,9 @@ def _buscar_web(query: str) -> str:
 
     try:
         from duckduckgo_search import DDGS
-        resultados = DDGS().text(query, max_results=5)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            resultados = DDGS().text(query, max_results=5)
         fragments = []
         for r in resultados:
             fragments.append(f"**{r.get('title', '')}**\n{r.get('body', '')}\nFuente: {r.get('href', '')}")
@@ -483,17 +503,95 @@ def _calcular_presupuesto(operacion: str) -> str:
 
 @tool
 def _buscar_foto_componente(query: str) -> str:
-    """Busca la URL de una imagen de un producto (DDGS)."""
+    """Busca la URL de una imagen de un producto. Primero intenta con Knasta.cl, luego DuckDuckGo."""
     logger_obs.info("tool_buscar_foto_componente", metadata={"query": query[:100]})
     try:
+        import json as _json
+        import re as _re
+        import requests as _requests
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
+            "Accept": "text/html",
+        }
+        url = f"https://knasta.cl/results?q={_requests.utils.quote(query)}&page=1"
+        r = _requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
+        m = _re.search(
+            r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>',
+            r.text,
+            _re.DOTALL,
+        )
+        if m:
+            data = _json.loads(m.group(1))
+            init = data.get("props", {}).get("pageProps", {}).get("initialData", {})
+            products = init.get("products", [])
+            for p in products[:5]:
+                img = p.get("image") or p.get("thumbnail_image") or ""
+                if img:
+                    return img
+    except Exception as e:
+        logger_obs.warning("tool_buscar_foto_knasta_fallo", metadata={"error": str(e)})
+    try:
         from duckduckgo_search import DDGS
-        resultados = DDGS().images(query, max_results=1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            resultados = DDGS().images(query, max_results=1)
         if resultados:
             return resultados[0]["image"]
         return "No se encontro imagen."
     except Exception as e:
         logger_obs.error("tool_buscar_foto_componente_error", metadata={"error": str(e)})
         return f"Error al buscar imagen: {e}"
+
+
+@tool
+def _buscar_knasta(producto: str) -> str:
+    """Busca productos en Knasta.cl (tienda online chilena) con precios actualizados del mercado.
+    USA esta herramienta CUANDO el usuario te pida comparar precios de mercado,
+    buscar productos en tiendas online, o cuando no encuentres el producto en tu catalogo local.
+    Hace una busqueda en tiempo real en Knasta.cl."""
+    logger_obs.info("tool_buscar_knasta", metadata={"producto": producto[:100]})
+    try:
+        import re as _re
+        import json as _json
+        import requests as _requests
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
+            "Accept": "text/html",
+        }
+        url = f"https://knasta.cl/results?q={_requests.utils.quote(producto)}&page=1&page_size=8"
+        r = _requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
+        m = _re.search(
+            r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>',
+            r.text,
+            _re.DOTALL,
+        )
+        if not m:
+            return "No se pudieron obtener datos de Knasta."
+        data = _json.loads(m.group(1))
+        init = data.get("props", {}).get("pageProps", {}).get("initialData", {})
+        products = init.get("products", [])
+        if not products:
+            return f"No se encontraron productos en Knasta para: {producto}"
+        resultados = []
+        for p in products[:8]:
+            title = p.get("title", "Sin titulo")
+            precio = p.get("current_price", 0)
+            tienda = p.get("retail_label", "")
+            url_p = p.get("url", "")
+            img = p.get("image") or p.get("thumbnail_image") or ""
+            precio_str = f"${int(precio):,}".replace(",", ".") if precio else "Consultar"
+            img_line = f"  Imagen: {img}" if img else ""
+            resultados.append(f"- {title}\n  Precio: {precio_str} CLP | Tienda: {tienda}\n  URL: {url_p}\n{img_line}".rstrip())
+        return "Resultados de Knasta.cl:\n\n" + "\n\n".join(resultados)
+    except Exception as e:
+        logger_obs.error("tool_buscar_knasta_error", metadata={"error": str(e)})
+        return _json.dumps({
+            "error": "No se pudo buscar en Knasta.",
+            "detalle": str(e),
+            "sugerencia": "Informa al usuario que hubo un problema con la busqueda en Knasta.",
+        })
 
 
 @tool
@@ -514,7 +612,7 @@ def _ver_carrito() -> str:
     return resultado
 
 
-_TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
+_TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _buscar_knasta, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
 
 app_state = HardiBotAppState(os.getenv("PERSONA_ID", "hardware")).iniciar()
 
@@ -530,6 +628,13 @@ async def chat_hardibot(user_input: str, session_id: str = "eval_session"):
     start_time = time.time()
     trace_id = f"chat-{int(time.time())}"
     logger_obs.info("chat_hardibot_inicio", metadata={"user_input": user_input[:100], "session_id": session_id}, trace_id=trace_id)
+
+    resultado_seguridad = app_state.agente_seguro.procesar(user_input)
+    if not resultado_seguridad.es_seguro:
+        logger_obs.warning("seguridad_bloqueo_chat", metadata={"razones": [e.detalle for e in resultado_seguridad.eventos]}, trace_id=trace_id)
+        console.print(f"\n[bold red]Seguridad:[/bold red] {resultado_seguridad.error_multi_idioma}")
+        return
+
     try:
         with Live(Markdown("Analizando y ejecutando herramientas..."), console=console, refresh_per_second=15) as live:
             respuesta = app_state.agent.invoke(
