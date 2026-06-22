@@ -5,6 +5,7 @@ from src.personas import PERSONAS
 from src.observability import get_dashboard_metrics, estimar_ahorro_tokens
 from src.sesiones import guardar_sesion, cargar_historial
 from src.auth import verificar, registrar
+from src.db import guardar_cotizacion, listar_cotizaciones, cargar_cotizacion
 
 AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
@@ -175,6 +176,31 @@ with st.sidebar:
             st.session_state.user = None
             st.rerun()
 
+    # ── Historial de cotizaciones ──
+    if user.get("email") != "anonimo":
+        st.divider()
+        with st.expander("📋 Mis cotizaciones guardadas", expanded=False):
+            cotizaciones = listar_cotizaciones(user["email"])
+            if cotizaciones:
+                for c in cotizaciones:
+                    total_str = f"{c['total_clp']:,}".replace(",", ".")
+                    label = f"Cotizacion #{c['id']} — ${total_str} CLP — {c['created_at'][:10]}"
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        if st.button(label, key=f"cot_{c['id']}", use_container_width=True):
+                            data = cargar_cotizacion(c['id'])
+                            if data:
+                                st.session_state.messages = data["mensajes"]
+                                st.session_state.persona_id = data.get("persona_id", "hardware")
+                                st.session_state.tool_history = []
+                                reconfigurar_agente(st.session_state.persona_id)
+                                app_state.carrito.limpiar()
+                                for item in data["carrito_json"]:
+                                    app_state.carrito.agregar(item["producto"], item["cantidad"], item["precio_unitario"])
+                                st.rerun()
+            else:
+                st.caption("Sin cotizaciones guardadas")
+
     # ── Controles admin ──
     if es_admin:
         st.caption(f"Catalogo: `{persona_actual['catalogo']}`")
@@ -320,4 +346,12 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
             messages=st.session_state.messages,
             tool_history=st.session_state.tool_history,
             carrito_items=app_state.carrito.items,
+        )
+
+        guardar_cotizacion(
+            email=user.get("email", "anonimo"),
+            persona_id=st.session_state.persona_id,
+            mensajes=st.session_state.messages,
+            carrito_items=app_state.carrito.items,
+            total_clp=int(app_state.carrito.total()),
         )

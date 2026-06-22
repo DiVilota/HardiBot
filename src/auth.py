@@ -1,109 +1,52 @@
-import os
-import json
 import hashlib
 import secrets
+from src.db import init_db, obtener_usuario, crear_usuario, usuario_existe
 
-USUARIOS_PATH = "data/usuarios.json"
-USUARIOS_DIR = "data/usuarios"
-
-ADMIN_DEFAULT = {
-    "email": "admin@hardibot.cl",
-    "nombre": "Admin Summit",
-    "rol": "admin",
-}
-
-_OLAS = None
+ADMIN_DEFAULT_EMAIL = "admin@hardibot.cl"
+ADMIN_DEFAULT_NAME = "Admin Summit"
+ADMIN_DEFAULT_PASSWORD = "summit2025"
+ADMIN_DEFAULT_ROL = "admin"
 
 
-def _cargar():
-    global _OLAS
-    if _OLAS is not None:
-        return _OLAS
-    os.makedirs(os.path.dirname(USUARIOS_PATH), exist_ok=True)
-    if not os.path.exists(USUARIOS_PATH):
-        _OLAS = _inicializar()
-        _guardar(_OLAS)
-    else:
-        with open(USUARIOS_PATH, "r", encoding="utf-8") as f:
-            _OLAS = json.load(f)
-    return _OLAS
-
-
-def _guardar(data):
-    global _OLAS
-    _OLAS = data
-    with open(USUARIOS_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def _inicializar():
+def _crear_admin_default():
     salt = secrets.token_hex(16)
-    pwd = "summit2025"
-    h = hashlib.pbkdf2_hmac("sha256", pwd.encode(), salt.encode(), 200000)
-    return {
-        "usuarios": {
-            ADMIN_DEFAULT["email"]: {
-                "nombre": ADMIN_DEFAULT["nombre"],
-                "rol": ADMIN_DEFAULT["rol"],
-                "password_hash": h.hex(),
-                "salt": salt,
-                "created_at": "auto",
-            }
-        }
-    }
+    h = hashlib.pbkdf2_hmac("sha256", ADMIN_DEFAULT_PASSWORD.encode(), salt.encode(), 200000)
+    crear_usuario(ADMIN_DEFAULT_EMAIL, ADMIN_DEFAULT_NAME, h.hex(), salt, ADMIN_DEFAULT_ROL)
 
 
-def _hash_password(password: str, salt: str = None) -> tuple:
-    if salt is None:
-        salt = secrets.token_hex(16)
-    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
-    return h.hex(), salt
+def _asegurar_tablas():
+    init_db()
+    if not usuario_existe(ADMIN_DEFAULT_EMAIL):
+        _crear_admin_default()
 
 
 def verificar(email: str, password: str) -> dict:
     """Login: retorna dict con email, nombre, rol o None."""
-    data = _cargar()
-    usuario = data.get("usuarios", {}).get(email)
+    _asegurar_tablas()
+    usuario = obtener_usuario(email)
     if not usuario:
         return None
-    h, _ = _hash_password(password, usuario["salt"])
-    if h == usuario["password_hash"]:
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), usuario["salt"].encode(), 200000)
+    if h.hex() == usuario["password_hash"]:
         return {"email": email, "nombre": usuario["nombre"], "rol": usuario["rol"]}
     return None
 
 
 def registrar(email: str, password: str, nombre: str) -> dict:
     """Registro publico: crea usuario con rol=user. Retorna dict o None si ya existe."""
-    data = _cargar()
-    if email in data.get("usuarios", {}):
+    _asegurar_tablas()
+    if usuario_existe(email):
         return None
-    h, salt = _hash_password(password)
-    data["usuarios"][email] = {
-        "nombre": nombre,
-        "rol": "user",
-        "password_hash": h,
-        "salt": salt,
-        "created_at": _now(),
-    }
-    _guardar(data)
+    salt = secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
+    crear_usuario(email, nombre, h.hex(), salt, "user")
     return {"email": email, "nombre": nombre, "rol": "user"}
 
 
 def agregar_admin(email: str, password: str, nombre: str):
     """CLI: crea admin."""
-    data = _cargar()
-    h, salt = _hash_password(password)
-    data["usuarios"][email] = {
-        "nombre": nombre,
-        "rol": "admin",
-        "password_hash": h,
-        "salt": salt,
-        "created_at": _now(),
-    }
-    _guardar(data)
-    return data["usuarios"][email]
-
-
-def _now():
-    from datetime import datetime
-    return datetime.now().isoformat()
+    _asegurar_tablas()
+    salt = secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
+    crear_usuario(email, nombre, h.hex(), salt, "admin")
+    return obtener_usuario(email)

@@ -41,6 +41,7 @@ node_modules/
 data/sesiones/
 data/usuarios/
 data/usuarios.json
+data/hardibot.db
 
 # Logs y métricas de runtime
 logs/
