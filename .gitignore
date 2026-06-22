@@ -40,5 +40,8 @@ node_modules/
 # Sesiones de usuario
 data/sesiones/
 
+# Usuarios admin
+data/usuarios.json
+
 # Logs y métricas de runtime
 logs/

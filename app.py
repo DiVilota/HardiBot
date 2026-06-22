@@ -4,6 +4,7 @@ from src.core import ejecutar_con_streaming, reconfigurar_agente, app_state
 from src.personas import PERSONAS
 from src.observability import get_dashboard_metrics, estimar_ahorro_tokens
 from src.sesiones import guardar_sesion, cargar_sesion, listar_sesiones, eliminar_sesion
+from src.auth import verificar
 
 AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
@@ -26,14 +27,15 @@ if "persona_id" not in st.session_state:
     st.session_state.persona_id = "hardware"
     st.session_state.tool_history = []
     st.session_state.session_id = f"sesion_{int(time.time())}"
-    st.session_state.dev_mode = False
+    st.session_state.admin = False
+    st.session_state.admin_email = ""
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": f"¡Hola! Soy {persona_actual['nombre']}. {persona_actual['descripcion']}"}
     ]
 
 avatar = AVATARS.get(st.session_state.persona_id, "🤖")
-dev_mode = st.session_state.get("dev_mode", False)
+es_admin = st.session_state.get("admin", False)
 
 st.title(f"{avatar} {persona_actual['nombre']}")
 st.caption(persona_actual["descripcion"])
@@ -82,16 +84,30 @@ with st.sidebar:
     else:
         st.caption("Carrito vacio")
 
-    # ── Modo Dev (al fondo, discreto) ──
+    # ── Admin (login opcional) ──
     st.divider()
-    st.caption("_Opciones avanzadas_")
-    modo = st.toggle("👁️ Vista desarrollador", value=dev_mode)
-    if modo != dev_mode:
-        st.session_state.dev_mode = modo
-        st.rerun()
+    if es_admin:
+        st.caption(f"🔑 Admin: **{st.session_state.admin_email}**")
+        if st.button("Cerrar sesion", use_container_width=True):
+            st.session_state.admin = False
+            st.session_state.admin_email = ""
+            st.rerun()
+    else:
+        with st.expander("🔐 Administrador", expanded=False):
+            with st.form("login_admin"):
+                email = st.text_input("Email", key="admin_email_input")
+                password = st.text_input("Contrasena", type="password", key="admin_pass_input")
+                if st.form_submit_button("Iniciar sesion", use_container_width=True):
+                    user = verificar(email, password)
+                    if user:
+                        st.session_state.admin = True
+                        st.session_state.admin_email = email
+                        st.rerun()
+                    else:
+                        st.error("Credenciales incorrectas")
 
-    # ── Controles solo para desarrolladores ──
-    if dev_mode:
+    # ── Controles solo para administradores ──
+    if es_admin:
         st.caption(f"Catalogo: `{persona_actual['catalogo']}`")
 
         with st.expander("📊 Dashboard LangSmith", expanded=False):
@@ -200,12 +216,12 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
                     tool_name = event.get("name", "")
                     current_tool = tool_name
                     friendly = TOOL_MESSAGES.get(tool_name, f"🔄 {tool_name}")
-                    if dev_mode:
+                    if es_admin:
                         status.markdown(f"🔄 **{tool_name}**")
                     else:
                         status.update(label=friendly, state="running")
                 elif event["type"] == "tool_end":
-                    if dev_mode:
+                    if es_admin:
                         duration = event.get("duration", "")
                         label = f"✅ **{current_tool or event.get('name', '')}**"
                         if duration:
@@ -218,7 +234,7 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
                     tool_calls = event["tool_calls"]
                     metadata = event["metadata"]
 
-            if dev_mode:
+            if es_admin:
                 status.update(
                     label=f"Completado — {len(tool_calls)} herramienta(s) · {metadata.get('latencia', '?')}s",
                     state="complete",
@@ -229,7 +245,7 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
 
             response_placeholder.markdown(displayed)
 
-            if dev_mode:
+            if es_admin:
                 with st.expander("Arbol de decision del agente", expanded=False):
                     st.caption(f"Latencia total: **{metadata.get('latencia', '?')}s**")
                     if tool_calls:
