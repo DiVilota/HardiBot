@@ -2,19 +2,21 @@ import os
 import json
 from datetime import datetime
 
-
-SESIONES_DIR = "data/sesiones"
+USUARIOS_DIR = "data/usuarios"
 
 
 def _asegurar_directorio():
-    os.makedirs(SESIONES_DIR, exist_ok=True)
+    os.makedirs(USUARIOS_DIR, exist_ok=True)
 
 
-def guardar_sesion(session_id: str, persona_id: str, messages: list, tool_history: list, carrito_items: list):
+def guardar_sesion(user_email: str, persona_id: str, messages: list, tool_history: list, carrito_items: list):
+    """Guarda el historial de un usuario autenticado."""
+    if not user_email or user_email == "anonimo":
+        return
     _asegurar_directorio()
-    path = os.path.join(SESIONES_DIR, f"{session_id}.json")
+    path = os.path.join(USUARIOS_DIR, f"{user_email}.json")
     data = {
-        "session_id": session_id,
+        "email": user_email,
         "persona_id": persona_id,
         "actualizado": datetime.now().isoformat(),
         "messages": messages,
@@ -25,33 +27,10 @@ def guardar_sesion(session_id: str, persona_id: str, messages: list, tool_histor
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def cargar_sesion(session_id: str) -> dict:
-    path = os.path.join(SESIONES_DIR, f"{session_id}.json")
+def cargar_historial(user_email: str) -> dict:
+    """Carga el historial de un usuario autenticado."""
+    path = os.path.join(USUARIOS_DIR, f"{user_email}.json")
     if not os.path.exists(path):
         return {}
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
-
-
-def listar_sesiones() -> list:
-    _asegurar_directorio()
-    sesiones = []
-    for filename in os.listdir(SESIONES_DIR):
-        if filename.endswith(".json"):
-            path = os.path.join(SESIONES_DIR, filename)
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            sesiones.append({
-                "session_id": data.get("session_id", filename[:-5]),
-                "persona_id": data.get("persona_id", ""),
-                "actualizado": data.get("actualizado", ""),
-                "mensajes": len(data.get("messages", [])),
-            })
-    sesiones.sort(key=lambda s: s["actualizado"], reverse=True)
-    return sesiones
-
-
-def eliminar_sesion(session_id: str):
-    path = os.path.join(SESIONES_DIR, f"{session_id}.json")
-    if os.path.exists(path):
-        os.remove(path)

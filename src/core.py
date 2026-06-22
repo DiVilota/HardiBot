@@ -332,7 +332,10 @@ class CarritoCompras:
         return sum(item["subtotal"] for item in self.items)
 
     def generar_pdf(self, output_path: str = None) -> bytes:
-        from fpdf import FPDF
+        try:
+            from fpdf import FPDF
+        except ImportError:
+            return b"Error: fpdf2 no instalado. Ejecuta: pip install fpdf2"
 
         pdf = FPDF()
         pdf.add_page()

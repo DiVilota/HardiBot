@@ -4,6 +4,7 @@ import hashlib
 import secrets
 
 USUARIOS_PATH = "data/usuarios.json"
+USUARIOS_DIR = "data/usuarios"
 
 ADMIN_DEFAULT = {
     "email": "admin@hardibot.cl",
@@ -60,6 +61,7 @@ def _hash_password(password: str, salt: str = None) -> tuple:
 
 
 def verificar(email: str, password: str) -> dict:
+    """Login: retorna dict con email, nombre, rol o None."""
     data = _cargar()
     usuario = data.get("usuarios", {}).get(email)
     if not usuario:
@@ -70,7 +72,25 @@ def verificar(email: str, password: str) -> dict:
     return None
 
 
+def registrar(email: str, password: str, nombre: str) -> dict:
+    """Registro publico: crea usuario con rol=user. Retorna dict o None si ya existe."""
+    data = _cargar()
+    if email in data.get("usuarios", {}):
+        return None
+    h, salt = _hash_password(password)
+    data["usuarios"][email] = {
+        "nombre": nombre,
+        "rol": "user",
+        "password_hash": h,
+        "salt": salt,
+        "created_at": _now(),
+    }
+    _guardar(data)
+    return {"email": email, "nombre": nombre, "rol": "user"}
+
+
 def agregar_admin(email: str, password: str, nombre: str):
+    """CLI: crea admin."""
     data = _cargar()
     h, salt = _hash_password(password)
     data["usuarios"][email] = {

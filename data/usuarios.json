@@ -1,0 +1,11 @@
+{
+  "usuarios": {
+    "admin@hardibot.cl": {
+      "nombre": "Admin Summit",
+      "rol": "admin",
+      "password_hash": "1cef9efbb9be93826be5feea7e3d4aa8e8dc283f545028b64ac3a495942ac9f8",
+      "salt": "59199b8de334d00d5d3eb02ee6834159",
+      "created_at": "auto"
+    }
+  }
+}

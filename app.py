@@ -3,8 +3,8 @@ import streamlit as st
 from src.core import ejecutar_con_streaming, reconfigurar_agente, app_state
 from src.personas import PERSONAS
 from src.observability import get_dashboard_metrics, estimar_ahorro_tokens
-from src.sesiones import guardar_sesion, cargar_sesion, listar_sesiones, eliminar_sesion
-from src.auth import verificar
+from src.sesiones import guardar_sesion, cargar_historial
+from src.auth import verificar, registrar
 
 AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
@@ -20,29 +20,97 @@ TOOL_MESSAGES = {
 
 st.set_page_config(page_title="HardiBot", layout="centered")
 
-persona_actual = PERSONAS[st.session_state.get("persona_id", "hardware")]
 PERSONA_IDS = list(PERSONAS.keys())
 
-if "persona_id" not in st.session_state:
-    st.session_state.persona_id = "hardware"
-    st.session_state.tool_history = []
-    st.session_state.session_id = f"sesion_{int(time.time())}"
-    st.session_state.admin = False
-    st.session_state.admin_email = ""
+# ── Inicializar estado ──
+for key, val in [
+    ("persona_id", "hardware"),
+    ("tool_history", []),
+    ("session_id", f"sesion_{int(time.time())}"),
+]:
+    if key not in st.session_state:
+        st.session_state[key] = val
+
 if "messages" not in st.session_state:
+    p = PERSONAS[st.session_state.persona_id]
     st.session_state.messages = [
-        {"role": "assistant", "content": f"¡Hola! Soy {persona_actual['nombre']}. {persona_actual['descripcion']}"}
+        {"role": "assistant", "content": f"¡Hola! Soy {p['nombre']}. {p['descripcion']}"}
     ]
 
+user = st.session_state.get("user", None)
+es_admin = user and user.get("rol") == "admin"
 avatar = AVATARS.get(st.session_state.persona_id, "🤖")
-es_admin = st.session_state.get("admin", False)
+
+# ══════════════════════════════════════════════════════════
+#  LOGIN / REGISTER GATE
+# ══════════════════════════════════════════════════════════
+if not user:
+    st.markdown("## 🔐 HardiBot")
+    st.caption("Inicia sesion para guardar tu historial de cotizaciones")
+
+    tab_login, tab_register = st.tabs(["Iniciar Sesion", "Crear Cuenta"])
+
+    with tab_login:
+        with st.form("login_form"):
+            email = st.text_input("Email", key="login_email")
+            password = st.text_input("Contrasena", type="password", key="login_password")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.form_submit_button("Entrar", use_container_width=True, type="primary"):
+                    u = verificar(email, password)
+                    if u:
+                        st.session_state.user = u
+                        h = cargar_historial(email)
+                        if h:
+                            st.session_state.messages = h.get("messages", st.session_state.messages)
+                            st.session_state.tool_history = h.get("tool_history", [])
+                            st.session_state.persona_id = h.get("persona_id", "hardware")
+                            reconfigurar_agente(st.session_state.persona_id)
+                            if h.get("carrito_items"):
+                                for item in h["carrito_items"]:
+                                    app_state.carrito.agregar(item["producto"], item["cantidad"], item["precio_unitario"])
+                        st.rerun()
+                    else:
+                        st.error("Credenciales incorrectas")
+            with col2:
+                if st.form_submit_button("Soy visitante", use_container_width=True):
+                    st.session_state.user = {"email": "anonimo", "nombre": "Visitante", "rol": "anonimo"}
+                    st.rerun()
+
+    with tab_register:
+        with st.form("register_form"):
+            nombre = st.text_input("Nombre", key="reg_nombre")
+            email_reg = st.text_input("Email", key="reg_email")
+            password_reg = st.text_input("Contrasena", type="password", key="reg_password")
+            if st.form_submit_button("Crear cuenta", use_container_width=True, type="primary"):
+                if not nombre or not email_reg or not password_reg:
+                    st.error("Completa todos los campos")
+                elif "@" not in email_reg:
+                    st.error("Email invalido")
+                elif len(password_reg) < 4:
+                    st.error("La contrasena debe tener al menos 4 caracteres")
+                else:
+                    nuevo = registrar(email_reg, password_reg, nombre)
+                    if nuevo:
+                        st.session_state.user = nuevo
+                        st.rerun()
+                    else:
+                        st.error("Este email ya esta registrado")
+
+    st.stop()
+
+# ══════════════════════════════════════════════════════════
+#  SIDEBAR
+# ══════════════════════════════════════════════════════════
+persona_actual = PERSONAS[st.session_state.persona_id]
 
 st.title(f"{avatar} {persona_actual['nombre']}")
 st.caption(persona_actual["descripcion"])
 
-# ── Sidebar ──────────────────────────────────────────────
 with st.sidebar:
     st.markdown("**Demo - Marca Blanca**")
+
+    # Personas
     cols = st.columns(len(PERSONA_IDS))
     for i, pid in enumerate(PERSONA_IDS):
         p = PERSONAS[pid]
@@ -57,6 +125,7 @@ with st.sidebar:
                     st.session_state.tool_history = []
                     st.rerun()
 
+    # Nueva sesion
     st.divider()
     if st.button("🧹 Nueva sesion", use_container_width=True, help="Limpiar chat, carrito e historial"):
         app_state.carrito.limpiar()
@@ -67,10 +136,12 @@ with st.sidebar:
         st.session_state.session_id = f"sesion_{int(time.time())}"
         st.rerun()
 
+    # Usuario activo
     st.divider()
-    st.caption(f"Persona activa: **{persona_actual['nombre']}**")
+    st.caption(f"👤 **{user.get('nombre', 'Visitante')}**")
+    st.caption(f"Persona activa: {persona_actual['nombre']}")
 
-    # ── Cotizacion PDF ──
+    # Cotizacion PDF
     st.divider()
     st.markdown("**📄 Cotizacion**")
     carrito = app_state.carrito
@@ -79,13 +150,16 @@ with st.sidebar:
         total_str = f"{total:,}".replace(",", ".")
         st.caption(f"Items: {len(carrito.items)} | Total: ${total_str} CLP")
         pdf_bytes = carrito.generar_pdf()
-        st.download_button(
-            label="📥 Descargar cotizacion PDF",
-            data=pdf_bytes,
-            file_name="cotizacion_hardibot.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-        )
+        if pdf_bytes.startswith(b"Error:"):
+            st.warning(pdf_bytes.decode())
+        else:
+            st.download_button(
+                label="📥 Descargar cotizacion PDF",
+                data=pdf_bytes,
+                file_name="cotizacion_hardibot.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+            )
         st.link_button(
             "📧 Enviar cotizacion a mi correo",
             "mailto:?subject=Cotizacion HardiBot&body=Adjunta el PDF descargado con tu cotizacion.",
@@ -94,29 +168,14 @@ with st.sidebar:
     else:
         st.caption("Carrito vacio")
 
-    # ── Admin (login opcional) ──
+    # Cerrar sesion
     st.divider()
-    if es_admin:
-        st.caption(f"🔑 Admin: **{st.session_state.admin_email}**")
-        if st.button("Cerrar sesion", use_container_width=True):
-            st.session_state.admin = False
-            st.session_state.admin_email = ""
+    if user.get("email") != "anonimo":
+        if st.button("🚪 Cerrar sesion", use_container_width=True):
+            st.session_state.user = None
             st.rerun()
-    else:
-        with st.expander("🔐 Administrador", expanded=False):
-            with st.form("login_admin"):
-                email = st.text_input("Email", key="admin_email_input")
-                password = st.text_input("Contrasena", type="password", key="admin_pass_input")
-                if st.form_submit_button("Iniciar sesion", use_container_width=True):
-                    user = verificar(email, password)
-                    if user:
-                        st.session_state.admin = True
-                        st.session_state.admin_email = email
-                        st.rerun()
-                    else:
-                        st.error("Credenciales incorrectas")
 
-    # ── Controles solo para administradores ──
+    # ── Controles admin ──
     if es_admin:
         st.caption(f"Catalogo: `{persona_actual['catalogo']}`")
 
@@ -129,7 +188,6 @@ with st.sidebar:
                 st.caption(f"Error: {metrics['mensaje']}")
             elif metrics.get("status") == "empty":
                 st.caption("Sin ejecuciones recientes")
-                st.caption("Envia un mensaje para ver metricas aqui")
             else:
                 col1, col2 = st.columns(2)
                 with col1:
@@ -145,9 +203,9 @@ with st.sidebar:
                     st.metric("Latencia max", f'{metrics["latencia_max"]}s')
                 ahorro = estimar_ahorro_tokens(metrics)
                 if ahorro:
-                    st.caption(f"Ahorro estimado: ~{ahorro['ahorro_estimado_tokens']} tokens ({ahorro['ahorro_estimado_porcentaje']}%)")
+                    st.caption(f"Ahorro estimado: ~{ahorro['ahorro_estimado_tokens']} tokens")
 
-        with st.expander("🔧 Traza de herramientas (esta sesion)", expanded=False):
+        with st.expander("🔧 Traza de herramientas", expanded=False):
             if st.session_state.tool_history:
                 for i, entry in enumerate(st.session_state.tool_history, 1):
                     st.caption(f"**Paso {i}** — {entry['query'][:60]}...")
@@ -157,29 +215,9 @@ with st.sidebar:
             else:
                 st.caption("Sin ejecuciones en esta sesion")
 
-        with st.expander("💾 Sesiones guardadas", expanded=False):
-            sesiones = listar_sesiones()
-            if sesiones:
-                for s in sesiones:
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        if st.button(f"{s['persona_id']} — {s['mensajes']} msg", key=f"load_{s['session_id']}", use_container_width=True):
-                            data = cargar_sesion(s['session_id'])
-                            if data:
-                                st.session_state.session_id = s['session_id']
-                                st.session_state.persona_id = data.get('persona_id', 'hardware')
-                                st.session_state.messages = data.get('messages', [])
-                                st.session_state.tool_history = data.get('tool_history', [])
-                                reconfigurar_agente(st.session_state.persona_id)
-                                st.rerun()
-                    with col2:
-                        if st.button("X", key=f"del_{s['session_id']}"):
-                            eliminar_sesion(s['session_id'])
-                            st.rerun()
-            else:
-                st.caption("Sin sesiones guardadas")
-
-# ── Chat ─────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════
+#  CHAT
+# ══════════════════════════════════════════════════════════
 for msg in st.session_state.messages:
     role = msg["role"]
     msg_avatar = avatar if role == "assistant" else None
@@ -209,8 +247,7 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
             st.markdown(prompt)
 
         with st.chat_message("assistant", avatar=avatar):
-            status_label = "Pensando..."
-            status = st.status(status_label, expanded=True)
+            status = st.status("Pensando...", expanded=True)
             response_placeholder = st.empty()
 
             displayed = ""
@@ -278,7 +315,7 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
         st.session_state.messages.append({"role": "assistant", "content": displayed})
 
         guardar_sesion(
-            session_id=st.session_state.get("session_id", "default"),
+            user_email=user.get("email", "anonimo"),
             persona_id=st.session_state.persona_id,
             messages=st.session_state.messages,
             tool_history=st.session_state.tool_history,
