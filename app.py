@@ -58,6 +58,16 @@ with st.sidebar:
                     st.rerun()
 
     st.divider()
+    if st.button("🧹 Nueva sesion", use_container_width=True, help="Limpiar chat, carrito e historial"):
+        app_state.carrito.limpiar()
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"¡Hola! Soy {persona_actual['nombre']}. {persona_actual['descripcion']}"}
+        ]
+        st.session_state.tool_history = []
+        st.session_state.session_id = f"sesion_{int(time.time())}"
+        st.rerun()
+
+    st.divider()
     st.caption(f"Persona activa: **{persona_actual['nombre']}**")
 
     # ── Cotizacion PDF ──

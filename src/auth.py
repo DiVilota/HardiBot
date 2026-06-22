@@ -68,3 +68,22 @@ def verificar(email: str, password: str) -> dict:
     if h == usuario["password_hash"]:
         return {"email": email, "nombre": usuario["nombre"], "rol": usuario["rol"]}
     return None
+
+
+def agregar_admin(email: str, password: str, nombre: str):
+    data = _cargar()
+    h, salt = _hash_password(password)
+    data["usuarios"][email] = {
+        "nombre": nombre,
+        "rol": "admin",
+        "password_hash": h,
+        "salt": salt,
+        "created_at": _now(),
+    }
+    _guardar(data)
+    return data["usuarios"][email]
+
+
+def _now():
+    from datetime import datetime
+    return datetime.now().isoformat()
