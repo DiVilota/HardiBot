@@ -601,10 +601,10 @@ def _buscar_foto_componente(query: str) -> str:
             resultados = DDGS().images(query, max_results=1)
         if resultados:
             return resultados[0]["image"]
-        return "No se encontro imagen."
+        return "No se encontro imagen. Indica al usuario que puede buscar una foto manualmente del producto en knasta.cl."
     except Exception as e:
         logger_obs.error("tool_buscar_foto_componente_error", metadata={"error": str(e)})
-        return f"Error al buscar imagen: {e}"
+        return f"No se pudo buscar imagen debido a un error. Sugiere al usuario buscar una foto manualmente del producto en knasta.cl."
 
 
 @tool

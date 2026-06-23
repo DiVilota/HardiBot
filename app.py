@@ -5,7 +5,7 @@ from src.personas import PERSONAS
 from src.observability import get_dashboard_metrics, estimar_ahorro_tokens
 from src.sesiones import guardar_sesion, cargar_historial
 from src.auth import verificar, registrar
-from src.db import guardar_cotizacion, listar_cotizaciones, cargar_cotizacion
+from src.db import guardar_cotizacion, listar_cotizaciones, cargar_cotizacion, obtener_usuario as db_obtener_usuario
 
 AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
@@ -43,6 +43,26 @@ es_admin = user and user.get("rol") == "admin"
 avatar = AVATARS.get(st.session_state.persona_id, "🤖")
 
 # ══════════════════════════════════════════════════════════
+#  AUTO-LOGIN VIA QUERY PARAM (persiste al refrescar F5)
+# ══════════════════════════════════════════════════════════
+if "user" not in st.session_state:
+    qp_email = st.query_params.get("user")
+    if qp_email:
+        u = db_obtener_usuario(qp_email)
+        if u:
+            st.session_state.user = {"email": u["email"], "nombre": u["nombre"], "rol": u["rol"]}
+            h = cargar_historial(u["email"])
+            if h:
+                st.session_state.messages = h.get("messages", st.session_state.messages)
+                st.session_state.tool_history = h.get("tool_history", [])
+                st.session_state.persona_id = h.get("persona_id", "hardware")
+                reconfigurar_agente(st.session_state.persona_id)
+                if h.get("carrito_items"):
+                    for item in h["carrito_items"]:
+                        app_state.carrito.agregar(item["producto"], item["cantidad"], item["precio_unitario"])
+            st.rerun()
+
+# ══════════════════════════════════════════════════════════
 #  LOGIN / REGISTER GATE
 # ══════════════════════════════════════════════════════════
 if not user:
@@ -61,6 +81,7 @@ if not user:
                     u = verificar(email, password)
                     if u:
                         st.session_state.user = u
+                        st.query_params["user"] = email
                         h = cargar_historial(email)
                         if h:
                             st.session_state.messages = h.get("messages", st.session_state.messages)
@@ -76,6 +97,7 @@ if not user:
             with col2:
                 if st.form_submit_button("Soy visitante", use_container_width=True):
                     st.session_state.user = {"email": "anonimo", "nombre": "Visitante", "rol": "anonimo"}
+                    st.query_params["user"] = "anonimo"
                     st.rerun()
 
     with tab_register:
@@ -94,6 +116,7 @@ if not user:
                     nuevo = registrar(email_reg, password_reg, nombre)
                     if nuevo:
                         st.session_state.user = nuevo
+                        st.query_params["user"] = email_reg
                         st.rerun()
                     else:
                         st.error("Este email ya esta registrado")
@@ -174,6 +197,7 @@ with st.sidebar:
     if user.get("email") != "anonimo":
         if st.button("🚪 Cerrar sesion", use_container_width=True):
             st.session_state.user = None
+            st.query_params.clear()
             st.rerun()
 
     # ── Historial de cotizaciones ──
@@ -268,6 +292,8 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
             })
             st.rerun()
     else:
+        cart_antes = len(app_state.carrito.items)
+
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -355,3 +381,6 @@ if prompt := st.chat_input("Escribe tu consulta aqui..."):
             carrito_items=app_state.carrito.items,
             total_clp=int(app_state.carrito.total()),
         )
+
+        if len(app_state.carrito.items) != cart_antes:
+            st.rerun()
