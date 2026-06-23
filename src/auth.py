@@ -4,7 +4,7 @@ from src.db import init_db, obtener_usuario, crear_usuario, usuario_existe
 
 ADMIN_DEFAULT_EMAIL = "admin@hardibot.cl"
 ADMIN_DEFAULT_NAME = "Admin Summit"
-ADMIN_DEFAULT_PASSWORD = "summit2025"
+ADMIN_DEFAULT_PASSWORD = "summit2026"
 ADMIN_DEFAULT_ROL = "admin"
 
 
