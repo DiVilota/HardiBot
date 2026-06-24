@@ -653,8 +653,17 @@ def _buscar_knasta(producto: str) -> str:
     import time as _time
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
-        "Accept": "text/html",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "es-CL,es;q=0.9,en;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
     }
     url = f"https://knasta.cl/results?q={_url_quote(producto)}&page=1&page_size=8"
 
@@ -693,12 +702,17 @@ def _buscar_knasta(producto: str) -> str:
             logger_obs.warning("tool_buscar_knasta_retry", metadata={"intento": intento + 1, "error": str(e)[:200]})
             _time.sleep(1)
 
-    logger_obs.error("tool_buscar_knasta_error", metadata={"error": str(last_error)[:300]})
-    return _json.dumps({
-        "error": "No se pudo buscar en Knasta.",
-        "detalle": str(last_error)[:200],
-        "sugerencia": "Informa al usuario que hubo un problema con la busqueda en Knasta. Sugiere usar _buscar_solotodo como alternativa.",
-    })
+    logger_obs.warning("tool_buscar_knasta_fallback_solotodo", metadata={"producto": producto[:100], "error": str(last_error)[:200]})
+    try:
+        resultado_st = _buscar_solotodo.invoke({"producto": producto})
+        return f"[Knasta.cl no disponible en este momento. Resultados alternativos desde SoloTodo:]\n\n{resultado_st}"
+    except Exception as fallback_error:
+        logger_obs.error("tool_buscar_knasta_fallback_error", metadata={"error": str(fallback_error)[:200]})
+        return _json.dumps({
+            "error": "No se pudo buscar en Knasta ni en SoloTodo.",
+            "detalle": f"Knasta: {str(last_error)[:100]} | SoloTodo: {str(fallback_error)[:100]}",
+            "sugerencia": "Sugiere al usuario intentar mas tarde o buscar manualmente en estas tiendas.",
+        })
 
 
 @tool
