@@ -189,3 +189,6 @@ def cargar_sesion(email):
 
 def _now():
     return datetime.now().isoformat()
+
+
+init_db()
