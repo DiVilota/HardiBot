@@ -1,36 +1,64 @@
+import time
 import streamlit as st
-from src.core import chat_hardibot_stream_sync
+from src.core import reconfigurar_agente, app_state
+from src.personas import PERSONAS
+from src.sesiones import cargar_historial
+from src.db import obtener_usuario as db_obtener_usuario
+from ui.theme import load_theme
+from ui.login import render_login
+from ui.sidebar import render_sidebar
+from ui.chat import render_chat
 
-# Configuración de la página
-st.set_page_config(page_title="HardiBot", page_icon="🤖", layout="centered")
-st.title("🤖 HardiBot")
-st.caption("Tu Consultor Experto en Hardware Computacional (Duoc UC Edition)")
+AVATARS = {"hardware": "💻", "ferreteria": "🛠️", "repuestos": "🚗"}
 
-# Inicializar el historial de chat en la memoria de Streamlit
+st.set_page_config(page_title="HardiBot", layout="wide")
+
+load_theme()
+
+# ── Inicializar estado de sesion ──
+for key, val in [
+    ("persona_id", "hardware"),
+    ("tool_history", []),
+    ("session_id", f"sesion_{int(time.time())}"),
+]:
+    if key not in st.session_state:
+        st.session_state[key] = val
+
 if "messages" not in st.session_state:
+    p = PERSONAS[st.session_state.persona_id]
     st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": "¡Hola! Soy HardiBot. ¿Qué tipo de PC necesitas armar hoy?",
-        }
+        {"role": "assistant", "content": f"¡Hola! Soy {p['nombre']}. {p['descripcion']}"}
     ]
 
-# Renderizar los mensajes del historial
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# ── Auto-login via query param ──
+if "user" not in st.session_state:
+    qp_email = st.query_params.get("user")
+    if qp_email:
+        u = db_obtener_usuario(qp_email)
+        if u:
+            st.session_state.user = {"email": u["email"], "nombre": u["nombre"], "rol": u["rol"]}
+            h = cargar_historial(u["email"])
+            if h:
+                st.session_state.messages = h.get("messages", st.session_state.messages)
+                st.session_state.tool_history = h.get("tool_history", [])
+                st.session_state.persona_id = h.get("persona_id", "hardware")
+                reconfigurar_agente(st.session_state.persona_id)
+                if h.get("carrito_items"):
+                    for item in h["carrito_items"]:
+                        app_state.carrito.agregar(item["producto"], item["cantidad"], item["precio_unitario"])
+            st.rerun()
 
-# Capturar el input del usuario
-if prompt := st.chat_input("Escribe tu consulta aquí..."):
-    # Mostrar el mensaje del usuario en pantalla
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+# ── Login Gate ──
+render_login()
 
-    # Mostrar la respuesta del bot en streaming
-    with st.chat_message("assistant"):
-        # st.write_stream consume el generador que hicimos en core.py
-        response = st.write_stream(chat_hardibot_stream_sync(prompt))
+# ── Header ──
+persona_actual = PERSONAS[st.session_state.persona_id]
+avatar = AVATARS.get(st.session_state.persona_id, "🤖")
+st.title(f"{avatar} {persona_actual['nombre']}")
+st.caption(persona_actual["descripcion"])
 
-    # Guardar la respuesta final en el historial
-    st.session_state.messages.append({"role": "assistant", "content": response})
+# ── Sidebar ──
+render_sidebar()
+
+# ── Chat ──
+render_chat(avatar)

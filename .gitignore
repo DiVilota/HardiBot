@@ -36,3 +36,12 @@ node_modules/
 *.log
 *.tmp
 *.cache
+
+# Sesiones de usuario
+data/sesiones/
+data/usuarios/
+data/usuarios.json
+data/hardibot.db
+
+# Logs y métricas de runtime
+logs/

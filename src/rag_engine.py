@@ -7,86 +7,122 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from rich.console import Console
 
-console = Console()
+console = Console(no_color=True, force_terminal=False)
 load_dotenv(override=True)
 
+CATALOGO_POR_DEFECTO = "data/catalogo_hardware.csv"
+
+
 class HardiBotRAG:
-    def __init__(self, data_path: str = "data/catalogo_hardware.csv"):
+    def __init__(self, data_path: str = CATALOGO_POR_DEFECTO):
         self.data_path = data_path
         self.vector_store = None
-        
-        # Inicialización del modelo de Embeddings 
+
         try:
             self.embeddings = OpenAIEmbeddings(
                 base_url=os.getenv("OPENAI_BASE_URL"),
                 api_key=os.getenv("GITHUB_TOKEN"),
-                model="text-embedding-3-small" # Modelo optimizado para RAG
+                model="text-embedding-3-small"
             )
         except Exception as e:
             console.print(f"[red]Error al cargar Embeddings: {e}[/red]")
 
     def construir_indice(self):
-        """Lee el CSV, genera los Chunks semánticos y los vectoriza en FAISS."""
-        console.print("[dim]⚙️ Iniciando ingesta de datos (RAG)...[/dim]")
-        
+        console.print("[dim]Iniciando ingesta de datos (RAG)...[/dim]")
+
         if not os.path.exists(self.data_path):
-            console.print(f"[red]❌ No se encontró el catálogo en: {self.data_path}[/red]")
+            console.print(f"[red]No se encontro el catalogo en: {self.data_path}[/red]")
             return False
 
-        # 1. Ingesta
         df = pd.read_csv(self.data_path)
         documents = []
 
-        # 2. Semantic Chunking (Transformar filas a lenguaje natural)
         for _, row in df.iterrows():
-            # Construimos un string semántico que el LLM entienda perfectamente
+            precio_formateado = f"{int(row['Precio_CLP']):,}".replace(",", ".")
             chunk_content = (
                 f"Componente: {row['Categoria']}\n"
                 f"Producto: {row['Marca']} {row['Modelo']}\n"
                 f"Especificaciones Técnicas: {row['Especificaciones']}\n"
-                f"Precio: ${row['Precio_CLP']} CLP\n"
+                f"Precio: {precio_formateado} CLP\n"
                 f"Disponibilidad de Stock: {row['Stock']}"
             )
-            
-            # Agregamos metadata por si queremos filtrar luego
+
             doc = Document(
-                page_content=chunk_content, 
+                page_content=chunk_content,
                 metadata={"categoria": row['Categoria'], "marca": row['Marca']}
             )
             documents.append(doc)
 
-        # 3. Vectorización y almacenamiento en FAISS
         try:
             self.vector_store = FAISS.from_documents(documents, self.embeddings)
-            console.print(f"[bold green]✅ Índice Vectorial FAISS creado: {len(documents)} productos indexados.[/bold green]")
+            console.print(f"[bold green]Indice Vectorial FAISS creado: {len(documents)} productos indexados.[/bold green]")
             return True
         except Exception as e:
-            console.print(f"[bold red]❌ Error al vectorizar: {e}[/bold red]")
+            console.print(f"[bold red]Error al vectorizar: {e}[/bold red]")
             return False
 
-    def recuperar_contexto(self, query: str, top_k: int = 3) -> str:
-        """Busca los K productos más relevantes para la consulta del usuario."""
+    def recargar(self, data_path: str = None):
+        if data_path:
+            self.data_path = data_path
+        return self.construir_indice()
+
+    def recuperar_contexto(self, query: str, top_k: int = 15) -> str:
         if not self.vector_store:
-            console.print("[yellow]⚠️ Índice vacío. Construyendo índice primero...[/yellow]")
+            console.print("[yellow]Indice vacio. Construyendo indice primero...[/yellow]")
             self.construir_indice()
 
-        # Búsqueda de similitud vectorial
+        query_lower = query.lower()
+        palabras_clave = [p.strip() for p in query_lower.replace(",", "").split() if len(p.strip()) > 2]
+
+        coincidencias = []
+        try:
+            df = pd.read_csv(self.data_path)
+            for _, row in df.iterrows():
+                texto = f"{row['Marca']} {row['Modelo']} {row['Especificaciones']}".lower()
+                coinciden = sum(1 for p in palabras_clave if p in texto)
+                if coinciden > 0:
+                    coincidencias.append((coinciden, row))
+            coincidencias.sort(key=lambda x: -x[0])
+        except Exception:
+            pass
+
+        if coincidencias:
+            fragmentos = []
+            for _, row in coincidencias[:top_k]:
+                precio_formateado = f"{int(row['Precio_CLP']):,}".replace(",", ".")
+                frag = (
+                    f"Componente: {row['Categoria']}\n"
+                    f"Producto: {row['Marca']} {row['Modelo']}\n"
+                    f"Especificaciones Técnicas: {row['Especificaciones']}\n"
+                    f"Precio: {precio_formateado} CLP\n"
+                    f"Disponibilidad de Stock: {row['Stock']}"
+                )
+                fragmentos.append(frag)
+            console.print(f"[dim]Busqueda por keyword: {len(coincidencias)} coincidencias[/dim]")
+            return "\n---\n".join(fragmentos)
+
+        console.print("[dim]Sin coincidencias directas, usando FAISS...[/dim]")
         resultados = self.vector_store.similarity_search(query, k=top_k)
-        
-        # Consolidar los resultados en un solo string para inyectar al LLM
+
         contexto = "\n---\n".join([doc.page_content for doc in resultados])
         return contexto
 
-# Bloque de prueba unitaria (Smoke Test)
+    @property
+    def total_productos(self) -> int:
+        if os.path.exists(self.data_path):
+            return sum(1 for _ in open(self.data_path)) - 1
+        return 0
+
+
 if __name__ == "__main__":
     motor = HardiBotRAG()
     exito = motor.construir_indice()
-    
+
     if exito:
         print("\n--- TEST DE RECUPERACIÓN ---")
         busqueda = "Quiero una tarjeta de video barata para jugar en 1080p"
         print(f"Query: '{busqueda}'\n")
-        
+
         resultados = motor.recuperar_contexto(busqueda)
         print("Resultados recuperados por FAISS:")
         print(resultados)
