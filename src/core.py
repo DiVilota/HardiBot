@@ -786,27 +786,41 @@ def _buscar_solotodo(producto: str) -> str:
                     entities = ent_data.get("results", [])
                     if entities:
                         ent = entities[0]
+                        # Solo incluir si tiene external_url real (no URL de API)
+                        external = ent.get("external_url", "")
+                        if not external or "api.solotodo.com" in external:
+                            _time.sleep(0.2)
+                            continue
                         store_info = ent.get("store", {})
                         tienda = store_info.get("name", "SoloTodo") if isinstance(store_info, dict) else "SoloTodo"
                         registry = ent.get("active_registry")
+                        precio = "Consultar"
                         if registry and registry.get("offer_price"):
-                            precio_val = float(registry["offer_price"])
-                            precio = f"${int(precio_val):,}".replace(",", ".")
-                        url_ent = ent.get("url", "")
-                        if url_ent:
-                            product_url = url_ent
+                            precio = f"${int(float(registry['offer_price'])):,}".replace(",", ".")
+                            all_results.append({
+                                "name": name,
+                                "precio": precio,
+                                "tienda": tienda,
+                                "url": external,
+                            })
+                        elif registry and registry.get("normal_price"):
+                            precio = f"${int(float(registry['normal_price'])):,}".replace(",", ".")
+                            all_results.append({
+                                "name": name,
+                                "precio": precio,
+                                "tienda": tienda,
+                                "url": external,
+                            })
                 _time.sleep(0.2)
             except Exception:
                 pass
 
-            line = f"**{name}**"
-            line += f"\nPrecio: {precio} CLP | Tienda: {tienda}"
-            line += f"\n[Comprar en {tienda}]({product_url})"
-            all_results.append(line)
-
         if all_results:
-            return "Resultados de SoloTodo:\n\n" + "\n\n".join(all_results)
-        return f"No se encontraron productos en SoloTodo para: {producto}"
+            lineas = []
+            for r in all_results:
+                lineas.append(f"**{r['name']}**\nPrecio: {r['precio']} CLP | Tienda: {r['tienda']}\n[Comprar en {r['tienda']}]({r['url']})")
+            return "Resultados de SoloTodo:\n\n" + "\n\n".join(lineas)
+        return f"No se encontraron productos con precios disponibles en SoloTodo para: {producto}"
 
     except Exception as e:
         logger_obs.error("tool_buscar_solotodo_error", metadata={"error": str(e)})
