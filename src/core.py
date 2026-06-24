@@ -215,6 +215,31 @@ def ejecutar_con_streaming(user_input: str, history: list = None, session_id: st
     tokens_in = estimar_tokens(user_input)
 
     event_queue: Queue = Queue()
+
+    # ── Recortar historial para no exceder 8000 tokens de GitHub Models ──
+    MAX_HISTORY_TOKENS = 5500
+    try:
+        import tiktoken as _tiktoken
+        enc = _tiktoken.encoding_for_model("gpt-4o")
+    except Exception:
+        enc = None
+
+    if history and enc:
+        resumen = (
+            "Resumen: El usuario pidio una cotizacion de productos. "
+            "Usa _ver_carrito si necesitas ver los items actuales en el carrito."
+        )
+        tokens_resumen = len(enc.encode(resumen))
+        disponibles = MAX_HISTORY_TOKENS - tokens_resumen
+        recortado = [("system", resumen)]
+        for msg in reversed(history):
+            tokens_msg = len(enc.encode(msg[1]))
+            if tokens_msg > disponibles:
+                break
+            recortado.insert(1, msg)
+            disponibles -= tokens_msg
+        history = recortado
+
     messages_input = history + [("user", user_input)] if history else [("user", user_input)]
 
     def _run():
