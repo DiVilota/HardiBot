@@ -708,3 +708,43 @@ button, [role="button"], a, select, input[type="submit"], input[type="reset"] {
     border-radius: var(--radius-md);
     font-size: 0.813rem;
 }
+
+/* ── Responsive Tables ── */
+.stChatMessage table {
+    font-size: 0.813rem;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+}
+
+.stChatMessage th,
+.stChatMessage td {
+    padding: 0.375rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.stChatMessage th {
+    font-weight: 600;
+    background: var(--bg-alt);
+    color: var(--text-secondary);
+}
+
+.stChatMessage th:last-child:empty,
+.stChatMessage td:last-child:empty {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .stChatMessage table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.75rem;
+    }
+    .stChatMessage th,
+    .stChatMessage td {
+        padding: 0.25rem 0.375rem;
+    }
+}

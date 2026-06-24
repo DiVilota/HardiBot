@@ -646,47 +646,59 @@ def _buscar_knasta(producto: str) -> str:
     buscar productos en tiendas online, o cuando no encuentres el producto en tu catalogo local.
     Hace una busqueda en tiempo real en Knasta.cl."""
     logger_obs.info("tool_buscar_knasta", metadata={"producto": producto[:100]})
-    try:
-        import re as _re
-        import json as _json
-        import requests as _requests
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
-            "Accept": "text/html",
-        }
-        url = f"https://knasta.cl/results?q={_requests.utils.quote(producto)}&page=1&page_size=8"
-        r = _requests.get(url, headers=headers, timeout=15)
-        r.raise_for_status()
-        m = _re.search(
-            r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>',
-            r.text,
-            _re.DOTALL,
-        )
-        if not m:
-            return "No se pudieron obtener datos de Knasta."
-        data = _json.loads(m.group(1))
-        init = data.get("props", {}).get("pageProps", {}).get("initialData", {})
-        products = init.get("products", [])
-        if not products:
-            return f"No se encontraron productos en Knasta para: {producto}"
-        resultados = []
-        for p in products[:8]:
-            title = p.get("title", "Sin titulo")
-            precio = p.get("current_price", 0)
-            tienda = p.get("retail_label", "")
-            url_p = p.get("url", "")
-            img = p.get("image") or p.get("thumbnail_image") or ""
-            precio_str = f"${int(precio):,}".replace(",", ".") if precio else "Consultar"
-            img_line = f"  Imagen: {img}" if img else ""
-            resultados.append(f"- {title}\n  Precio: {precio_str} CLP | Tienda: {tienda}\n  URL: {url_p}\n{img_line}".rstrip())
-        return "Resultados de Knasta.cl:\n\n" + "\n\n".join(resultados)
-    except Exception as e:
-        logger_obs.error("tool_buscar_knasta_error", metadata={"error": str(e)})
-        return _json.dumps({
-            "error": "No se pudo buscar en Knasta.",
-            "detalle": str(e),
-            "sugerencia": "Informa al usuario que hubo un problema con la busqueda en Knasta.",
-        })
+    import re as _re
+    import json as _json
+    import requests as _requests
+    from urllib.parse import quote as _url_quote
+    import time as _time
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
+        "Accept": "text/html",
+    }
+    url = f"https://knasta.cl/results?q={_url_quote(producto)}&page=1&page_size=8"
+
+    last_error = None
+    for intento in range(3):
+        try:
+            r = _requests.get(url, headers=headers, timeout=20)
+            r.raise_for_status()
+            m = _re.search(
+                r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>',
+                r.text,
+                _re.DOTALL,
+            )
+            if not m:
+                last_error = RuntimeError("__NEXT_DATA__ no encontrado en la pagina")
+                _time.sleep(1)
+                continue
+            data = _json.loads(m.group(1))
+            init = data.get("props", {}).get("pageProps", {}).get("initialData", {})
+            products = init.get("products", [])
+            if not products:
+                return f"No se encontraron productos en Knasta para: {producto}"
+            resultados = []
+            for p in products[:8]:
+                title = p.get("title", "Sin titulo")
+                precio = p.get("current_price", 0)
+                tienda = p.get("retail_label", "")
+                url_p = p.get("url", "")
+                img = p.get("image") or p.get("thumbnail_image") or ""
+                precio_str = f"${int(precio):,}".replace(",", ".") if precio else "Consultar"
+                img_line = f"  Imagen: {img}" if img else ""
+                resultados.append(f"- {title}\n  Precio: {precio_str} CLP | Tienda: {tienda}\n  URL: {url_p}\n{img_line}".rstrip())
+            return "Resultados de Knasta.cl:\n\n" + "\n\n".join(resultados)
+        except Exception as e:
+            last_error = e
+            logger_obs.warning("tool_buscar_knasta_retry", metadata={"intento": intento + 1, "error": str(e)[:200]})
+            _time.sleep(1)
+
+    logger_obs.error("tool_buscar_knasta_error", metadata={"error": str(last_error)[:300]})
+    return _json.dumps({
+        "error": "No se pudo buscar en Knasta.",
+        "detalle": str(last_error)[:200],
+        "sugerencia": "Informa al usuario que hubo un problema con la busqueda en Knasta. Sugiere usar _buscar_solotodo como alternativa.",
+    })
 
 
 @tool
