@@ -67,4 +67,4 @@ def render_tool_trace():
         st.caption(f"**Paso {i}** — {entry['query'][:60]}...")
         for tc in entry["tools"]:
             icon = "OK" if tc["status"] == "complete" else "ERR"
-            st.markdown(f"{icon} `{tc['name']}` — {tc['duration']}s")
+            st.markdown(f"{icon} **`{tc['name']}`** — {tc['duration']}s")

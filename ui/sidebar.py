@@ -19,13 +19,6 @@ def render_sidebar():
     with st.sidebar:
         st.markdown("### HardiBot v3.0")
 
-        # ── Colapsar panel lateral ──
-        col_main, col_arrow = st.columns([5, 1])
-        with col_arrow:
-            if st.button("◀", key="sb_collapse", help="Ocultar panel lateral"):
-                st.session_state.sidebar_collapsed = True
-                st.rerun()
-
         # ── Persona selector ──
         st.markdown("**Asistente activo**")
         cols = st.columns(len(PERSONA_IDS))
@@ -90,15 +83,6 @@ def render_sidebar():
         # ── Admin ──
         if es_admin:
             render_admin()
-
-        st.divider()
-
-        # ── Dark mode toggle ──
-        dark = st.session_state.get("dark_mode", False)
-        dark_label = "🌙 Modo oscuro" if not dark else "☀️ Modo claro"
-        if st.button(dark_label, use_container_width=True, help="Alternar tema oscuro/claro"):
-            st.session_state.dark_mode = not dark
-            st.rerun()
 
         return avatar
 

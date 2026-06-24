@@ -15,14 +15,6 @@ st.set_page_config(page_title="HardiBot", layout="wide")
 
 load_theme()
 
-if st.session_state.get("sidebar_collapsed"):
-    from ui.theme import inject_sidebar_collapsed_css
-    inject_sidebar_collapsed_css()
-
-if st.session_state.get("dark_mode"):
-    from ui.theme import inject_dark_css
-    inject_dark_css()
-
 # ── Inicializar estado de sesion ──
 for key, val in [
     ("persona_id", "hardware"),

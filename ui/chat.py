@@ -21,14 +21,6 @@ def render_chat(avatar):
     user = st.session_state.get("user", {})
     es_admin = user.get("rol") == "admin"
 
-    # ── Boton expandir sidebar ──
-    if st.session_state.get("sidebar_collapsed"):
-        col_exp, _ = st.columns([0.18, 0.82])
-        with col_exp:
-            if st.button("▶ Mostrar panel", key="expand_sidebar_btn", help="Mostrar barra lateral", use_container_width=True):
-                st.session_state.sidebar_collapsed = False
-                st.rerun()
-
     # ── Render message history ──
     for msg in st.session_state.messages:
         role = msg["role"]
@@ -125,6 +117,23 @@ def _stream_response(es_admin, prompt, history):
         elif event["type"] == "meta":
             tool_calls = event["tool_calls"]
             metadata = event["metadata"]
+        elif event["type"] == "error":
+            displayed = f"❌ **Error:** {event.get('content', 'Error desconocido')}"
+            response_placeholder.markdown(displayed)
+
+    if metadata.get("bloqueado"):
+        displayed = f"🚫 **{metadata.get('error', 'Consulta bloqueada')}**"
+        response_placeholder.markdown(displayed)
+        status.update(label="⛔ Bloqueado", state="error")
+        status.expanded = False
+        return displayed, tool_calls, metadata
+
+    if metadata.get("cache_hit"):
+        displayed = metadata.get("texto", "")
+        response_placeholder.markdown(displayed)
+        status.update(label="⚡ Respuesta instantanea (cache)", state="complete")
+        status.expanded = False
+        return displayed, tool_calls, metadata
 
     if es_admin:
         status.update(
