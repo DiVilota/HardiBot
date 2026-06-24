@@ -722,79 +722,97 @@ def _buscar_solotodo(producto: str) -> str:
     o quiera comparar precios de proveedores chilenos en SoloTodo.
     Retorna productos con precio, tienda, link e imagen."""
     logger_obs.info("tool_buscar_solotodo", metadata={"producto": producto[:100]})
+    import json as _json
+    import requests as _requests
+    import time as _time
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+    }
+    API_BASE = "https://api.solotodo.com"
+
+    CATEGORY_KEYWORDS = {
+        3: ["procesador", "cpu", "ryzen", "intel", "core i", "amd"],
+        5: ["placa", "motherboard", "mother"],
+        2: ["tarjeta", "grafica", "gpu", "video", "rtx", "gtx", "radeon"],
+        7: ["ram", "memoria", "ddr4", "ddr5"],
+        39: ["ssd", "disco", "almacenamiento", "nvm", "hdd", "nvme"],
+        9: ["fuente", "psu", "poder", "power"],
+        10: ["gabinete", "case", "torre"],
+        4: ["monitor", "pantalla"],
+        12: ["cooler", "ventilador", "refrigeracion"],
+    }
+
+    CATEGORY_NAMES = {
+        3: "Procesador", 5: "Placa Madre", 2: "Tarjeta Video",
+        7: "Memoria RAM", 39: "Almacenamiento", 9: "Fuente Poder",
+        10: "Gabinete", 4: "Monitor", 12: "Cooler CPU",
+    }
+
+    query_lower = producto.lower()
+    cat_ids = [cid for cid, keywords in CATEGORY_KEYWORDS.items() if any(kw in query_lower for kw in keywords)]
+    if not cat_ids:
+        cat_ids = list(CATEGORY_KEYWORDS.keys())
+
+    all_results = []
+    seen_ids = set()
+    cat_str = ",".join(str(c) for c in cat_ids[:3])
+    url = f"{API_BASE}/products/?categories={cat_str}&page_size=8&format=json"
+
     try:
-        import json as _json
-        import requests as _requests
-        from urllib.parse import quote
-
-        search_url = f"https://publicapi.solotodo.com/products/{quote(producto)}/"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
-            "Accept": "application/json",
-        }
-        r = _requests.get(search_url, headers=headers, timeout=15)
-
-        if r.status_code != 200:
-            return f"No se encontraron productos en SoloTodo para: {producto}"
-
+        r = _requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
         data = r.json()
-        products = data.get("results", []) if isinstance(data, dict) else data
+        products = data.get("results", [])
 
-        if not products:
-            return f"No se encontraron productos en SoloTodo para: {producto}"
-
-        resultados = []
-        for p in products[:6]:
+        for p in products[:8]:
             prod_id = p.get("id")
+            if prod_id in seen_ids:
+                continue
+            seen_ids.add(prod_id)
+
             name = p.get("name", "Sin nombre")
-            brand_info = p.get("brand", {}) if isinstance(p.get("brand"), dict) else {}
-            marca = brand_info.get("name", "")
 
             precio = "Consultar"
             tienda = "SoloTodo"
-            image_url = p.get("picture_url") or p.get("image") or ""
             product_url = f"https://www.solotodo.com/products/{prod_id}"
 
-            if prod_id:
-                try:
-                    ent_url = "https://publicapi.solotodo.com/entities/"
-                    ent_params = {"product": prod_id, "is_visible": "True", "page_size": 3}
-                    ent_resp = _requests.get(ent_url, params=ent_params, headers=headers, timeout=10)
-                    if ent_resp.status_code == 200:
-                        ent_data = ent_resp.json()
-                        entities = ent_data.get("results", [])
-                        if entities:
-                            cheapest = entities[0]
-                            store_info = cheapest.get("store", {}) if isinstance(cheapest.get("store"), dict) else {}
-                            tienda = store_info.get("name", "SoloTodo")
-                            registry = cheapest.get("active_registry")
-                            if registry and registry.get("offer_price"):
-                                precio_val = float(registry["offer_price"])
-                                precio = f"${int(precio_val):,}".replace(",", ".")
-                            product_url = cheapest.get("url", product_url)
-                except Exception:
-                    pass
+            try:
+                ent_url = f"{API_BASE}/entities/?product={prod_id}&is_visible=True&page_size=1&format=json"
+                ent_r = _requests.get(ent_url, headers=headers, timeout=10)
+                if ent_r.status_code == 200:
+                    ent_data = ent_r.json()
+                    entities = ent_data.get("results", [])
+                    if entities:
+                        ent = entities[0]
+                        store_info = ent.get("store", {})
+                        tienda = store_info.get("name", "SoloTodo") if isinstance(store_info, dict) else "SoloTodo"
+                        registry = ent.get("active_registry")
+                        if registry and registry.get("offer_price"):
+                            precio_val = float(registry["offer_price"])
+                            precio = f"${int(precio_val):,}".replace(",", ".")
+                        url_ent = ent.get("url", "")
+                        if url_ent:
+                            product_url = url_ent
+                _time.sleep(0.2)
+            except Exception:
+                pass
 
             line = f"**{name}**"
-            if marca:
-                line += f" ({marca})"
             line += f"\nPrecio: {precio} CLP | Tienda: {tienda}"
-            if product_url != f"https://www.solotodo.com/products/{prod_id}":
-                line += f"\n[Comprar en {tienda}]({product_url})"
-            else:
-                line += f"\n[Ver en SoloTodo]({product_url})"
-            if image_url:
-                line += f"\nImagen: {image_url}"
+            line += f"\n[Comprar en {tienda}]({product_url})"
+            all_results.append(line)
 
-            resultados.append(line)
-
-        return "Resultados de SoloTodo:\n\n" + "\n\n".join(resultados)
+        if all_results:
+            return "Resultados de SoloTodo:\n\n" + "\n\n".join(all_results)
+        return f"No se encontraron productos en SoloTodo para: {producto}"
 
     except Exception as e:
         logger_obs.error("tool_buscar_solotodo_error", metadata={"error": str(e)})
         return _json.dumps({
             "error": "No se pudo buscar en SoloTodo.",
-            "detalle": str(e),
+            "detalle": str(e)[:200],
             "sugerencia": "Sugiere usar _buscar_knasta o _buscar_web como alternativa.",
         })
 
