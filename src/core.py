@@ -779,7 +779,7 @@ def _buscar_solotodo(producto: str) -> str:
             product_url = f"https://www.solotodo.com/products/{prod_id}"
 
             try:
-                ent_url = f"{API_BASE}/entities/?product={prod_id}&is_visible=True&page_size=1&format=json"
+                ent_url = f"{API_BASE}/entities/?products={prod_id}&is_visible=True&page_size=1&format=json"
                 ent_r = _requests.get(ent_url, headers=headers, timeout=10)
                 if ent_r.status_code == 200:
                     ent_data = ent_r.json()
