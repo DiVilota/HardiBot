@@ -480,8 +480,8 @@ class HardiBotAppState:
         self.motor_rag.construir_indice()
         self.prompt = obtener_prompt(persona_id)
         self.llm = ChatOpenAI(
-            base_url=os.getenv("OPENAI_BASE_URL"),
-            api_key=os.getenv("GITHUB_TOKEN"),
+            base_url=os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL"),
+            api_key=os.getenv("OPENAI_API_KEY") or os.getenv("GITHUB_TOKEN"),
             model=os.getenv("MODEL_NAME", "gpt-4o"),
             temperature=float(os.getenv("MODEL_TEMPERATURE", "0.4")),
             max_tokens=int(os.getenv("MODEL_MAX_TOKENS", "4096")),
@@ -491,7 +491,7 @@ class HardiBotAppState:
         self.memoria = MemorySaver()
         self.agent = None
         self.agente_seguro = AgenteSeguro(
-            api_key=os.getenv("GITHUB_TOKEN", ""),
+            api_key=os.getenv("OPENAI_API_KEY") or os.getenv("GITHUB_TOKEN", ""),
             modelo=os.getenv("MODEL_NAME", "gpt-4o"),
         )
 

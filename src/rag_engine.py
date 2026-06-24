@@ -20,8 +20,8 @@ class HardiBotRAG:
 
         try:
             self.embeddings = OpenAIEmbeddings(
-                base_url=os.getenv("OPENAI_BASE_URL"),
-                api_key=os.getenv("GITHUB_TOKEN"),
+                base_url=os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL"),
+                api_key=os.getenv("OPENAI_API_KEY") or os.getenv("GITHUB_TOKEN"),
                 model="text-embedding-3-small"
             )
         except Exception as e:
