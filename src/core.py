@@ -373,7 +373,7 @@ class CarritoCompras:
         if output_path:
             pdf.output(output_path)
             return output_path
-        return pdf.output()
+        return bytes(pdf.output())
 
 
 class HerramientaRobusta:
