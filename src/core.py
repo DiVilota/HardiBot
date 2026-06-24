@@ -93,8 +93,11 @@ class ToolCaptureHandler(BaseCallbackHandler):
                 break
 
 
-def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_session"):
-    """Ejecuta el agente y retorna (tool_calls, response_text, metadata)."""
+def ejecutar_con_visibilidad(user_input: str, history: list = None, session_id: str = "streamlit_session"):
+    """Ejecuta el agente y retorna (tool_calls, response_text, metadata).
+
+    history: lista de tuplas ("user"|"assistant", contenido) con el historial de mensajes previos.
+    """
     start = time.time()
     handler = ToolCaptureHandler()
     trace_id = f"vis-{int(time.time())}"
@@ -124,8 +127,9 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     modelo_config = seleccionar_modelo(user_input)
     tokens_in = estimar_tokens(user_input)
 
+    messages_input = history + [("user", user_input)] if history else [("user", user_input)]
     respuesta = app_state.agent.invoke(
-        {"messages": [("user", user_input)]},
+        {"messages": messages_input},
         config={
             "configurable": {"thread_id": session_id},
             "callbacks": [handler],
@@ -186,8 +190,10 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     return handler.tool_calls, texto_final, metadata
 
 
-def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session"):
+def ejecutar_con_streaming(user_input: str, history: list = None, session_id: str = "streamlit_session"):
     """Generador sincrono que emite eventos de streaming en tiempo real.
+
+    history: lista de tuplas ("user"|"assistant", contenido) con el historial de mensajes previos.
     Yields dicts: {"type": "token", "content": str} | {"type": "meta", "tool_calls": [], "metadata": {}} | {"type": "error", "content": str}
     """
     trace_id = f"stream-{int(time.time())}"
@@ -209,6 +215,7 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
     tokens_in = estimar_tokens(user_input)
 
     event_queue: Queue = Queue()
+    messages_input = history + [("user", user_input)] if history else [("user", user_input)]
 
     def _run():
         loop = asyncio.new_event_loop()
@@ -220,7 +227,7 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
             async def _stream():
                 try:
                     async for event in app_state.agent.astream_events(
-                        {"messages": [("user", user_input)]},
+                        {"messages": messages_input},
                         config={
                             "configurable": {"thread_id": session_id},
                             "callbacks": [handler],

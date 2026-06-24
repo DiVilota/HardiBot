@@ -1,0 +1,703 @@
+/* ══════════════════════════════════════════════════════════
+   HardiBot v3.0 — Industrial Tech Design System
+   Paleta Accessible WCAG 2.1 AA
+   ══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+    --primary: #0F172A;
+    --primary-light: #1E293B;
+    --accent: #3B82F6;
+    --accent-hover: #2563EB;
+    --accent-warm: #F59E0B;
+    --accent-warm-hover: #D97706;
+    --success: #10B981;
+    --success-light: #D1FAE5;
+    --error: #EF4444;
+    --error-light: #FEE2E2;
+    --warning: #F59E0B;
+    --bg: #F8FAFC;
+    --bg-alt: #F1F5F9;
+    --surface: #FFFFFF;
+    --text: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    --border-focus: #3B82F6;
+
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+
+    --transition: 150ms ease;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Global ── */
+.stApp {
+    font-family: var(--font-family);
+    background: var(--bg);
+}
+
+.stMain {
+    background: var(--bg);
+}
+
+/* ── Override Streamlit defaults ── */
+.st-emotion-cache-1y4p8pa { padding-top: 2rem; }
+.st-emotion-cache-1avcm0n { visibility: hidden; }
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+h1 { font-size: 1.5rem !important; }
+h2 { font-size: 1.25rem !important; }
+h3 { font-size: 1.125rem !important; }
+
+/* ── Buttons ── */
+.stButton > button {
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.stButton > button:hover {
+    background: var(--bg-alt);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.stButton > button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.stButton > button[kind="primary"] {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-color: var(--accent);
+}
+
+.stButton > button[kind="primary"]:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #FFFFFF;
+}
+
+/* ── Chat Messages ── */
+.stChatMessage {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4) !important;
+    margin-bottom: var(--space-3);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+[data-testid="stChatMessage"] {
+    max-width: 90%;
+}
+
+/* User messages: right aligned, blue tint */
+[data-testid="stChatMessage"][data-testid*="user"] {
+    background: var(--accent);
+    color: #FFFFFF;
+    margin-left: auto;
+}
+
+[data-testid="stChatMessage"][data-testid*="user"] .stMarkdown p {
+    color: #FFFFFF;
+}
+
+/* Assistant messages: left aligned, white card */
+[data-testid="stChatMessage"][data-testid*="assistant"] {
+    background: var(--surface);
+    margin-right: auto;
+}
+
+/* ── Chat Input ── */
+.stChatInput {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding: var(--space-3) 0;
+    z-index: 10;
+}
+
+.stChatInput textarea {
+    font-family: var(--font-family);
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border) !important;
+    transition: border-color var(--transition);
+    font-size: 0.938rem;
+    min-height: 44px;
+    padding: 0.625rem 0.875rem !important;
+}
+
+.stChatInput textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ── Sidebar ── */
+.stSidebar {
+    background: var(--primary);
+}
+
+.stSidebar .stMarkdown, .stSidebar .stCaption {
+    color: #CBD5E1 !important;
+}
+
+.stSidebar h1, .stSidebar h2, .stSidebar h3 {
+    color: #F8FAFC !important;
+}
+
+.stSidebar .stButton > button {
+    background: var(--primary-light);
+    color: #E2E8F0;
+    border: 1px solid #334155;
+    border-radius: var(--radius-md);
+    font-size: 0.813rem;
+}
+
+.stSidebar .stButton > button:hover {
+    background: #334155;
+    border-color: var(--accent);
+    color: #FFFFFF;
+}
+
+.stSidebar .stButton > button[kind="primary"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFFFFF;
+}
+
+.stSidebar .stDivider {
+    border-color: #334155;
+}
+
+.stSidebar .stExpander {
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+    border: 1px solid #334155;
+}
+
+/* ── Sidebar persona buttons ── */
+.stSidebar .persona-btn-row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+[data-testid="stSidebar"] .stButton > button[title] {
+    min-width: 0;
+    padding: 0.5rem 0.625rem;
+    white-space: nowrap;
+    font-size: 0.813rem;
+}
+
+/* ── Expanders ── */
+.stExpander {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    margin-bottom: var(--space-3);
+}
+
+.stExpander > div:first-child {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* ── Forms ── */
+.stForm {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.stTextInput > div > div > input {
+    font-family: var(--font-family);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    transition: border-color var(--transition);
+    min-height: 44px;
+    font-size: 0.938rem;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ── Tabs ── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: var(--space-1);
+    background: var(--bg-alt);
+    border-radius: var(--radius-lg);
+    padding: 0.25rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
+    padding: 0.5rem 1rem;
+    transition: all var(--transition);
+}
+
+.stTabs [aria-selected="true"] {
+    background: var(--surface) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── Metrics Dashboard ── */
+.stMetric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4) !important;
+}
+
+.stMetric label {
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.stMetric [data-testid="stMetricValue"] {
+    font-size: 1.5rem !important;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ── Status Indicator ── */
+.stTooltipHoverTarget {
+    font-family: var(--font-family);
+}
+
+/* ── Empty States ── */
+.empty-state {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    color: var(--text-muted);
+}
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-3);
+    opacity: 0.4;
+}
+
+.empty-state-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+/* ── Loading Skeletons ── */
+@keyframes skeleton-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+.skeleton {
+    background: var(--bg-alt);
+    border-radius: var(--radius-md);
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-line { height: 0.75rem; margin-bottom: 0.5rem; }
+.skeleton-line:last-child { width: 60%; }
+.skeleton-card { height: 4rem; }
+
+/* ── Login Card ── */
+.login-container {
+    max-width: 420px;
+    margin: 2rem auto;
+    padding: var(--space-8) var(--space-6);
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.login-logo {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-4);
+}
+
+.login-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+}
+
+.login-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-6);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Tool execution status ── */
+.tool-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0.125rem;
+}
+
+.tool-chip-running {
+    background: #DBEAFE;
+    color: #1D4ED8;
+}
+
+.tool-chip-done {
+    background: var(--success-light);
+    color: #065F46;
+}
+
+.tool-chip-error {
+    background: var(--error-light);
+    color: #991B1B;
+}
+
+/* ── Animated dots (typing indicator) ── */
+@keyframes typing-dot {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.typing-indicator {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: typing-dot 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ── Links ── */
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* ── Welcome cards ── */
+.welcome-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.welcome-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.welcome-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.welcome-card-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-2);
+}
+
+.welcome-card-text {
+    font-size: 0.813rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* ── Alerts / Notifications ── */
+.alert-success {
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    color: #065F46;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+}
+
+.alert-error {
+    background: var(--error-light);
+    border: 1px solid var(--error);
+    color: #991B1B;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+}
+
+/* ── Cart item ── */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid #334155;
+    font-size: 0.813rem;
+}
+
+.cart-item:last-child { border-bottom: none; }
+
+.cart-total {
+    font-weight: 700;
+    font-size: 0.938rem;
+    padding-top: var(--space-2);
+    color: #F8FAFC;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS — Mobile-first
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Phone (< 480px) ── */
+@media (max-width: 480px) {
+    .stChatMessage { max-width: 100% !important; }
+    .stButton > button { font-size: 0.813rem; padding: 0.5rem 0.75rem; }
+    h1 { font-size: 1.25rem !important; }
+    h2 { font-size: 1.125rem !important; }
+    .login-container { margin: 1rem; padding: var(--space-5) var(--space-4); }
+    .stMetric { padding: var(--space-2) var(--space-3) !important; }
+    .stMetric [data-testid="stMetricValue"] { font-size: 1.25rem !important; }
+    .stTabs [data-baseweb="tab"] { padding: 0.375rem 0.5rem; font-size: 0.75rem; }
+}
+
+/* ── Tablet (481px - 768px) ── */
+@media (min-width: 481px) and (max-width: 768px) {
+    .stChatMessage { max-width: 95% !important; }
+    .login-container { margin: 2rem auto; max-width: 380px; }
+}
+
+/* ── Small Desktop (769px - 1024px) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stChatMessage { max-width: 88% !important; }
+}
+
+/* ── Desktop (> 1024px) ── */
+@media (min-width: 1025px) {
+    .stChatMessage { max-width: 85% !important; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE-FIRST ENHANCEMENTS
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    /* Form inputs full-width */
+    .stTextInput input {
+        font-size: 1rem !important;
+    }
+
+    /* Stack form buttons vertically */
+    .stForm [data-testid="column"] {
+        min-width: 100% !important;
+    }
+
+    /* Sidebar persona buttons stack */
+    [data-testid="stSidebar"] [data-testid="column"] {
+        min-width: 100% !important;
+        margin-bottom: var(--space-2);
+    }
+
+    /* Expanders wider on mobile */
+    .stExpander {
+        margin-left: -0;
+        margin-right: -0;
+    }
+
+    /* Larger expander hit area */
+    .stExpander summary {
+        padding: var(--space-3) var(--space-4);
+        min-height: 44px;
+    }
+
+    /* Welcome grid single column on mobile */
+    .welcome-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Chat messages closer to edges on tablet/phone */
+    .stMain [data-testid="stVerticalBlock"] {
+        padding-left: var(--space-2) !important;
+        padding-right: var(--space-2) !important;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACCESSIBILITY — WCAG 2.1 AA
+   ══════════════════════════════════════════════════════════ */
+
+/* Focus ring replacement — do NOT remove */
+*:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px !important;
+}
+
+/* Buttons and links: visible focus indication */
+.stButton > button:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* Ensure all interactive elements have cursor */
+button, [role="button"], a, select, input[type="submit"], input[type="reset"] {
+    cursor: pointer;
+}
+
+/* Touch targets minimum 44x44 on all breakpoints */
+@media (pointer: coarse) {
+    .stButton > button,
+    .stDownloadButton > button,
+    .stLinkButton > button,
+    a[role="button"],
+    .stTabs [data-baseweb="tab"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MICRO-INTERACTIONS
+   ══════════════════════════════════════════════════════════ */
+
+/* Smooth page transitions */
+.stApp {
+    transition: background var(--transition);
+}
+
+/* Status indicator animation */
+@keyframes status-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.stStatusWidget {
+    animation: none;
+}
+
+.stStatusWidget[aria-label*="running"] {
+    animation: status-pulse 1.5s ease-in-out infinite;
+}
+
+/* Button loading state */
+.stButton > button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Slide-in animation for chat messages */
+@keyframes message-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stChatMessage {
+    animation: message-in 200ms ease-out;
+}
+
+/* Hover scale on clickable cards (welcome cards already handled) */
+
+/* Code blocks readability */
+.stCodeBlock {
+    border-radius: var(--radius-md);
+    font-size: 0.813rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE SIDEBAR SCROLLBAR
+   ══════════════════════════════════════════════════════════ */
+
+.stSidebar ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: var(--radius-full);
+}
+
+.stSidebar ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}

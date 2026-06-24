@@ -171,5 +171,8 @@ def obtener_prompt(persona_id: str) -> str:
     )
 
 
+PERSONA_IDS = list(PERSONAS.keys())
+
+
 def listar_personas() -> list[str]:
     return list(PERSONAS.keys())
