@@ -111,6 +111,27 @@ def cargar_cotizacion(cot_id):
     return None
 
 
+def eliminar_cotizacion(cot_id, email):
+    conn = conectar()
+    cur = conn.execute(
+        "DELETE FROM cotizaciones WHERE id = ? AND email = ?",
+        (cot_id, email),
+    )
+    ok = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return ok
+
+
+def listar_todas_cotizaciones():
+    conn = conectar()
+    rows = conn.execute(
+        "SELECT id, email, persona_id, created_at, total_clp FROM cotizaciones ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 # ── Sesiones ──
 
 def guardar_sesion(email, persona_id, mensajes, tool_history, carrito_items):

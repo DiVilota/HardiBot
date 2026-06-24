@@ -29,23 +29,48 @@ def get_langsmith_runs(limit=10):
         )
         project = _get_env("LANGSMITH_PROJECT", "LANGCHAIN_PROJECT", "ingenieria_soluciones_con_ia")
         runs = list(client.list_runs(project_name=project, execution_order=1, limit=limit))
-        return [_format_run(r) for r in runs]
+        return [_format_run(r, client, project) for r in runs]
     except Exception as e:
         return {"error": str(e)}
 
 
-def _format_run(run):
+def _format_run(run, client=None, project=None):
     start = run.start_time if hasattr(run, "start_time") else None
     end = run.end_time if hasattr(run, "end_time") else None
     latency = (end - start).total_seconds() if start and end else None
+
+    total_tokens = getattr(run, "total_tokens", None)
+    prompt_tokens = getattr(run, "prompt_tokens", None)
+    completion_tokens = getattr(run, "completion_tokens", None)
+
+    if total_tokens is None and client is not None:
+        try:
+            child_llm = list(client.list_runs(
+                project_name=project,
+                parent_run_id=run.id,
+                run_type="llm",
+                limit=50,
+            ))
+            if child_llm:
+                total_tokens = sum(
+                    getattr(cr, "total_tokens", 0) or 0 for cr in child_llm
+                ) or None
+                prompt_tokens = sum(
+                    getattr(cr, "prompt_tokens", 0) or 0 for cr in child_llm
+                ) or None
+                completion_tokens = sum(
+                    getattr(cr, "completion_tokens", 0) or 0 for cr in child_llm
+                ) or None
+        except Exception:
+            pass
 
     return {
         "run_id": str(getattr(run, "id", ""))[:8],
         "name": getattr(run, "name", "unknown"),
         "latency": round(latency, 2) if latency else None,
-        "total_tokens": getattr(run, "total_tokens", None),
-        "prompt_tokens": getattr(run, "prompt_tokens", None),
-        "completion_tokens": getattr(run, "completion_tokens", None),
+        "total_tokens": total_tokens,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
         "error": getattr(run, "error", None),
         "start_time": start.isoformat() if start else None,
     }

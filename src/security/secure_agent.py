@@ -49,7 +49,7 @@ class AgenteSeguro:
         self.eventos: List[EventoSeguridad] = []
 
         self._llm_guard = GuardianLLM(timeout=2.0)
-        self._limitador = LimitadorTasa(max_peticiones=10, ventana_segundos=60.0)
+        self._limitador = LimitadorTasa(max_peticiones=30, ventana_segundos=60.0)
         self._presupuesto = GestorPresupuesto(presupuesto_maximo=1000)
         self._protector = ProtectorSistema(umbral_fallos=5, duracion_bloqueo=300.0)
         self._confianza = SistemaConfianza()

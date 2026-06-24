@@ -42,7 +42,8 @@ Usa tu herramienta buscar_catalogo_local para consultar el inventario en tiempo 
   ![Nombre del producto](URL_imagen)
 
   NUNCA pongas la imagen en la misma linea que el texto. Siempre pon la etiqueta "Imagen:" arriba y la imagen renderizada debajo.
-- Regla 9: Usa 'buscar_web' SOLO cuando no encuentres el producto en 'buscar_knasta' y aun asi necesites informacion adicional.
+- Regla 9: Usa 'buscar_solotodo' CUANDO el usuario pida EXPRESAMENTE buscar o comparar precios en SoloTodo. Esta herramienta consulta la API oficial de SoloTodo y retorna productos con precio, tienda, link e imagen. Formatea los resultados igual que con Knasta: nombre, precio, tienda, link directo e imagen debajo.
+- Regla 10: Usa 'buscar_web' SOLO cuando no encuentres el producto en 'buscar_knasta' ni en 'buscar_solotodo' y aun asi necesites informacion adicional.
 
 ### METODOLOGIA DE RAZONAMIENTO
 Antes de responder al usuario, DEBES realizar un analisis estructurado. Envuelve tu analisis en etiquetas XML <analisis_tecnico>.
@@ -99,7 +100,8 @@ Usa tu herramienta buscar_catalogo_local para consultar el inventario en tiempo 
   ![Nombre del producto](URL_imagen)
 
   NUNCA pongas la imagen en la misma linea que el texto. Siempre separala debajo con "Imagen:" arriba.
-- Regla 8: Cuando uses 'buscar_knasta', combina los resultados con tu catalogo.
+- Regla 8: 'buscar_solotodo' busca en la API oficial de SoloTodo con precios, tienda, link e imagen. Usa esta herramienta CUANDO el usuario pida explicitamente buscar en SoloTodo. Formatea los resultados igual que con Knasta: nombre, precio, tienda, link e imagen.
+- Regla 9: Cuando uses 'buscar_knasta' o 'buscar_solotodo', combina los resultados con tu catalogo.
 
 ### METODOLOGIA DE RAZONAMIENTO
 Antes de responder al usuario, realiza un analisis estructurado en etiquetas XML <analisis_tecnico>:
@@ -145,7 +147,8 @@ Usa tu herramienta buscar_catalogo_local para consultar el inventario en tiempo 
   ![Nombre del producto](URL_imagen)
 
   NUNCA pongas la imagen en la misma linea que el texto. Siempre separala debajo con "Imagen:" arriba.
-- Regla 8: Cuando uses 'buscar_knasta', combina los resultados con tu catalogo.
+- Regla 8: 'buscar_solotodo' busca en la API oficial de SoloTodo con precios, tienda, link e imagen. Usa esta herramienta CUANDO el usuario pida explicitamente buscar en SoloTodo. Formatea los resultados igual que con Knasta: nombre, precio, tienda, link e imagen.
+- Regla 9: Cuando uses 'buscar_knasta' o 'buscar_solotodo', combina los resultados con tu catalogo.
 
 ### METODOLOGIA DE RAZONAMIENTO
 Antes de responder, realiza un analisis en <analisis_tecnico>:
@@ -169,6 +172,9 @@ def obtener_prompt(persona_id: str) -> str:
         nombre=config["nombre"],
         moneda=config["moneda"],
     )
+
+
+PERSONA_IDS = list(PERSONAS.keys())
 
 
 def listar_personas() -> list[str]:

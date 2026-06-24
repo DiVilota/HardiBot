@@ -93,8 +93,11 @@ class ToolCaptureHandler(BaseCallbackHandler):
                 break
 
 
-def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_session"):
-    """Ejecuta el agente y retorna (tool_calls, response_text, metadata)."""
+def ejecutar_con_visibilidad(user_input: str, history: list = None, session_id: str = "streamlit_session"):
+    """Ejecuta el agente y retorna (tool_calls, response_text, metadata).
+
+    history: lista de tuplas ("user"|"assistant", contenido) con el historial de mensajes previos.
+    """
     start = time.time()
     handler = ToolCaptureHandler()
     trace_id = f"vis-{int(time.time())}"
@@ -124,8 +127,9 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     modelo_config = seleccionar_modelo(user_input)
     tokens_in = estimar_tokens(user_input)
 
+    messages_input = history + [("user", user_input)] if history else [("user", user_input)]
     respuesta = app_state.agent.invoke(
-        {"messages": [("user", user_input)]},
+        {"messages": messages_input},
         config={
             "configurable": {"thread_id": session_id},
             "callbacks": [handler],
@@ -186,8 +190,10 @@ def ejecutar_con_visibilidad(user_input: str, session_id: str = "streamlit_sessi
     return handler.tool_calls, texto_final, metadata
 
 
-def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session"):
+def ejecutar_con_streaming(user_input: str, history: list = None, session_id: str = "streamlit_session"):
     """Generador sincrono que emite eventos de streaming en tiempo real.
+
+    history: lista de tuplas ("user"|"assistant", contenido) con el historial de mensajes previos.
     Yields dicts: {"type": "token", "content": str} | {"type": "meta", "tool_calls": [], "metadata": {}} | {"type": "error", "content": str}
     """
     trace_id = f"stream-{int(time.time())}"
@@ -210,6 +216,32 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
 
     event_queue: Queue = Queue()
 
+    # ── Recortar historial para no exceder 8000 tokens de GitHub Models ──
+    MAX_HISTORY_TOKENS = 5500
+    try:
+        import tiktoken as _tiktoken
+        enc = _tiktoken.encoding_for_model("gpt-4o")
+    except Exception:
+        enc = None
+
+    if history and enc:
+        resumen = (
+            "Resumen: El usuario pidio una cotizacion de productos. "
+            "Usa _ver_carrito si necesitas ver los items actuales en el carrito."
+        )
+        tokens_resumen = len(enc.encode(resumen))
+        disponibles = MAX_HISTORY_TOKENS - tokens_resumen
+        recortado = [("system", resumen)]
+        for msg in reversed(history):
+            tokens_msg = len(enc.encode(msg[1]))
+            if tokens_msg > disponibles:
+                break
+            recortado.insert(1, msg)
+            disponibles -= tokens_msg
+        history = recortado
+
+    messages_input = history + [("user", user_input)] if history else [("user", user_input)]
+
     def _run():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -220,7 +252,7 @@ def ejecutar_con_streaming(user_input: str, session_id: str = "streamlit_session
             async def _stream():
                 try:
                     async for event in app_state.agent.astream_events(
-                        {"messages": [("user", user_input)]},
+                        {"messages": messages_input},
                         config={
                             "configurable": {"thread_id": session_id},
                             "callbacks": [handler],
@@ -452,7 +484,7 @@ class HardiBotAppState:
             api_key=os.getenv("GITHUB_TOKEN"),
             model=os.getenv("MODEL_NAME", "gpt-4o"),
             temperature=float(os.getenv("MODEL_TEMPERATURE", "0.4")),
-            max_tokens=int(os.getenv("MODEL_MAX_TOKENS", "800")),
+            max_tokens=int(os.getenv("MODEL_MAX_TOKENS", "4096")),
             streaming=True,
         )
         self.carrito = CarritoCompras()
@@ -658,6 +690,90 @@ def _buscar_knasta(producto: str) -> str:
 
 
 @tool
+def _buscar_solotodo(producto: str) -> str:
+    """Busca productos en SoloTodo.com (API oficial) con precios actualizados del mercado chileno.
+    Usa esta herramienta CUANDO el usuario te pida EXPRESAMENTE buscar en SoloTodo,
+    o quiera comparar precios de proveedores chilenos en SoloTodo.
+    Retorna productos con precio, tienda, link e imagen."""
+    logger_obs.info("tool_buscar_solotodo", metadata={"producto": producto[:100]})
+    try:
+        import json as _json
+        import requests as _requests
+        from urllib.parse import quote
+
+        search_url = f"https://publicapi.solotodo.com/products/{quote(producto)}/"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/120.0",
+            "Accept": "application/json",
+        }
+        r = _requests.get(search_url, headers=headers, timeout=15)
+
+        if r.status_code != 200:
+            return f"No se encontraron productos en SoloTodo para: {producto}"
+
+        data = r.json()
+        products = data.get("results", []) if isinstance(data, dict) else data
+
+        if not products:
+            return f"No se encontraron productos en SoloTodo para: {producto}"
+
+        resultados = []
+        for p in products[:6]:
+            prod_id = p.get("id")
+            name = p.get("name", "Sin nombre")
+            brand_info = p.get("brand", {}) if isinstance(p.get("brand"), dict) else {}
+            marca = brand_info.get("name", "")
+
+            precio = "Consultar"
+            tienda = "SoloTodo"
+            image_url = p.get("picture_url") or p.get("image") or ""
+            product_url = f"https://www.solotodo.com/products/{prod_id}"
+
+            if prod_id:
+                try:
+                    ent_url = "https://publicapi.solotodo.com/entities/"
+                    ent_params = {"product": prod_id, "is_visible": "True", "page_size": 3}
+                    ent_resp = _requests.get(ent_url, params=ent_params, headers=headers, timeout=10)
+                    if ent_resp.status_code == 200:
+                        ent_data = ent_resp.json()
+                        entities = ent_data.get("results", [])
+                        if entities:
+                            cheapest = entities[0]
+                            store_info = cheapest.get("store", {}) if isinstance(cheapest.get("store"), dict) else {}
+                            tienda = store_info.get("name", "SoloTodo")
+                            registry = cheapest.get("active_registry")
+                            if registry and registry.get("offer_price"):
+                                precio_val = float(registry["offer_price"])
+                                precio = f"${int(precio_val):,}".replace(",", ".")
+                            product_url = cheapest.get("url", product_url)
+                except Exception:
+                    pass
+
+            line = f"**{name}**"
+            if marca:
+                line += f" ({marca})"
+            line += f"\nPrecio: {precio} CLP | Tienda: {tienda}"
+            if product_url != f"https://www.solotodo.com/products/{prod_id}":
+                line += f"\n[Comprar en {tienda}]({product_url})"
+            else:
+                line += f"\n[Ver en SoloTodo]({product_url})"
+            if image_url:
+                line += f"\nImagen: {image_url}"
+
+            resultados.append(line)
+
+        return "Resultados de SoloTodo:\n\n" + "\n\n".join(resultados)
+
+    except Exception as e:
+        logger_obs.error("tool_buscar_solotodo_error", metadata={"error": str(e)})
+        return _json.dumps({
+            "error": "No se pudo buscar en SoloTodo.",
+            "detalle": str(e),
+            "sugerencia": "Sugiere usar _buscar_knasta o _buscar_web como alternativa.",
+        })
+
+
+@tool
 def _agregar_al_carrito(producto: str, cantidad: int, precio_unitario: float) -> str:
     """Agrega un producto al carrito de compras del usuario."""
     logger_obs.info("tool_agregar_al_carrito", metadata={"producto": producto[:50], "cantidad": cantidad, "precio_unitario": precio_unitario})
@@ -675,7 +791,7 @@ def _ver_carrito() -> str:
     return resultado
 
 
-_TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _buscar_knasta, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
+_TOOLS[:] = [_buscar_catalogo_local, _buscar_web, _buscar_knasta, _buscar_solotodo, _calcular_presupuesto, _buscar_foto_componente, _agregar_al_carrito, _ver_carrito]
 
 app_state = HardiBotAppState(os.getenv("PERSONA_ID", "hardware")).iniciar()
 
